@@ -210,318 +210,337 @@ class _BookListViewState extends State<BookListView> {
 
     final SidebarController sidebarController = Get.put(SidebarController());
 
-    return Column(
-      // crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: Get.width < 768
-              ? MainAxisAlignment.start
-              : MainAxisAlignment.center,
-          children: [
-            SizedBox(
-              width: 20,
-            ),
-            Get.width < 768
-                ? GestureDetector(
-                    onTap: () {
-                      sidebarController.showsidebar.value = true;
-                    },
-                    child: SvgPicture.asset(
-                      'assets/images/drawernavigation.svg',
-                      colorFilter:
-                          ColorFilter.mode(primaryColor, BlendMode.srcIn),
-                    ),
-                  )
-                : SizedBox.shrink(),
-            Padding(
-              padding: EdgeInsets.only(
-                  left: width <= 375
-                      ? 10
-                      : width <= 520
-                          ? 10 // You can specify the width for widths less than 425
-                          : width < 768
-                              ? 15 // You can specify the width for widths less than 768
-                              : width < 1024
-                                  ? 15 // You can specify the width for widths less than 1024
-                                  : width <= 1440
-                                      ? 15
-                                      : width > 1440 && width <= 2550
-                                          ? 15
-                                          : 15,
-                  top: 20,
-                  bottom: 20),
-              child: SizedBox(
-                width: width <= 375
-                    ? 200
-                    : width <= 425
-                        ? 240
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 100,vertical: 20),
+      child: Column(
+        // crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: Get.width < 768
+                ? MainAxisAlignment.start
+                : MainAxisAlignment.center,
+            children: [
+              SizedBox(
+                width: 20,
+              ),
+              Get.width < 768
+                  ? GestureDetector(
+                      onTap: () {
+                        sidebarController.showsidebar.value = true;
+                      },
+                      child: SvgPicture.asset(
+                        'assets/images/drawernavigation.svg',
+                        colorFilter:
+                            ColorFilter.mode(primaryColor, BlendMode.srcIn),
+                      ),
+                    )
+                  : SizedBox.shrink(),
+              Padding(
+                padding: EdgeInsets.only(
+                    left: width <= 375
+                        ? 10
                         : width <= 520
-                            ? 260 // You can specify the width for widths less than 425
+                            ? 10 // You can specify the width for widths less than 425
                             : width < 768
-                                ? 370 // You can specify the width for widths less than 768
+                                ? 15 // You can specify the width for widths less than 768
                                 : width < 1024
-                                    ? 400 // You can specify the width for widths less than 1024
+                                    ? 15 // You can specify the width for widths less than 1024
                                     : width <= 1440
-                                        ? 500
+                                        ? 15
                                         : width > 1440 && width <= 2550
-                                            ? 500
-                                            : 800,
-                child: TextField(
-                  onChanged: (value) {
-                    setState(() {
-                      searchQuery = value;
-                    });
-                  },
-                  decoration: InputDecoration(
-                    hintText: "Search",
-                    fillColor: primaryColor,
-                    filled: true,
-                    border: OutlineInputBorder(
-                      borderSide: BorderSide.none,
-                      borderRadius: const BorderRadius.all(Radius.circular(10)),
-                    ),
-                    suffixIcon: Container(
-                      padding: EdgeInsets.all(defaultPadding * 0.75),
-                      margin:
-                          EdgeInsets.symmetric(horizontal: defaultPadding / 2),
-                      decoration: BoxDecoration(
-                        color: primaryColor,
+                                            ? 15
+                                            : 15,
+                    top: 20,
+                    bottom: 20),
+                child: SizedBox(
+                  width: width <= 375
+                      ? 200
+                      : width <= 425
+                          ? 240
+                          : width <= 520
+                              ? 260 // You can specify the width for widths less than 425
+                              : width < 768
+                                  ? 370 // You can specify the width for widths less than 768
+                                  : width < 1024
+                                      ? 400 // You can specify the width for widths less than 1024
+                                      : width <= 1440
+                                          ? 500
+                                          : width > 1440 && width <= 2550
+                                              ? 500
+                                              : 800,
+                  child: TextField(
+                    onChanged: (value) {
+                      setState(() {
+                        searchQuery = value;
+                      });
+                    },
+                    decoration: InputDecoration(
+                      hintText: "Search",
+                      fillColor: primaryColor,
+                      filled: true,
+                      border: OutlineInputBorder(
+                        borderSide: BorderSide.none,
                         borderRadius:
                             const BorderRadius.all(Radius.circular(10)),
                       ),
-                      child: Icon(
-                        Icons.search,
-                        color: Colors.white,
+                      suffixIcon: Container(
+                        padding: EdgeInsets.all(defaultPadding * 0.75),
+                        margin: EdgeInsets.symmetric(
+                            horizontal: defaultPadding / 2),
+                        decoration: BoxDecoration(
+                          color: primaryColor,
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(10)),
+                        ),
+                        child: Icon(
+                          Icons.search,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
+            ],
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    overflow: width <= 520
+                        ? TextOverflow.ellipsis
+                        : TextOverflow.visible,
+                    maxLines: width <= 520 ? 1 : 2,
+                    'Image',
+                    style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w500,
+                        color: primaryColor),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                Expanded(
+                  child: Text(
+                    overflow: width <= 520
+                        ? TextOverflow.ellipsis
+                        : TextOverflow.visible,
+                    maxLines: width <= 520 ? 1 : 2,
+                    'Title',
+                    style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w500,
+                        color: primaryColor),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                Expanded(
+                  child: Text(
+                      overflow: width <= 520
+                          ? TextOverflow.ellipsis
+                          : TextOverflow.visible,
+                      maxLines: width <= 520 ? 1 : 2,
+                      'Brand',
+                      style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500,
+                          color: primaryColor),
+                      textAlign: TextAlign.center),
+                ),
+                Expanded(
+                  child: Text(
+                      overflow: width <= 520
+                          ? TextOverflow.ellipsis
+                          : TextOverflow.visible,
+                      maxLines: width <= 520 ? 1 : 2,
+                      'Date',
+                      style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500,
+                          color: primaryColor),
+                      textAlign: TextAlign.center),
+                ),
+                Expanded(
+                  child: Text(
+                      overflow: width <= 520
+                          ? TextOverflow.ellipsis
+                          : TextOverflow.visible,
+                      maxLines: width <= 520 ? 1 : 2,
+                      'Price',
+                      style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500,
+                          color: primaryColor),
+                      textAlign: TextAlign.center),
+                ),
+              ],
             ),
-          ],
-        ),
-        Row(
-          children:  [
-             Expanded(
-              child: Text(
-                overflow:  width <= 520?TextOverflow.ellipsis:TextOverflow.visible,
-                maxLines: width <= 520?1:2,
+          ),
+          Expanded(
+            child: StreamBuilder<QuerySnapshot>(
+              stream: fireStore.collection('productsListing').snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(
+                    child: CircularProgressIndicator(),
+                  );
+                } else if (snapshot.hasError) {
+                  return Center(
+                    child: Text('Error Loading Data'),
+                  );
+                } else if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  return Center(
+                    child: Text('No Listings Found'),
+                  );
+                } else {
+                  List<Map<String, dynamic>> listings =
+                      snapshot.data!.docs.map((doc) {
+                    return {
+                      'productImages': doc['productImages'],
+                      'productName': doc['productName'],
+                      'category': doc['category'],
+                      'brand': doc['brand'],
+                      'productCondition': doc['productCondition'],
+                      'productPrice': doc['productPrice'],
+                      'postedDate': doc['postedDate'],
+                      'sellerId': doc['sellerId'],
+                      'Description': doc['Description'],
+                      'approval': doc['approval'],
+                      'size': doc['size'],
+                      'listingId': doc.id,
+                    };
+                  }).toList();
 
-                'Product Image',
-                style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w500,
-                    color: primaryColor),
-                textAlign: TextAlign.center,
-              ),
-            ),
-            Expanded(
-              child: Text(
-                overflow:  width <= 520?TextOverflow.ellipsis:TextOverflow.visible,
-                maxLines: width <= 520?1:2,
+                  // Apply search query filter
+                  List<Map<String, dynamic>> filteredListings =
+                      listings.where((listing) {
+                    String productName = listing['productName'] ?? '';
 
-                'Product Name',
-                style: const TextStyle(
+                    return productName
+                        .toLowerCase()
+                        .contains(searchQuery.toLowerCase());
+                  }).toList();
 
-                    fontSize: 18,
-                    fontWeight: FontWeight.w500,
-                    color: primaryColor),
-                textAlign: TextAlign.center,
-              ),
-            ),
-             Expanded(
-              child: Text(
-                  overflow:  width <= 520?TextOverflow.ellipsis:TextOverflow.visible,
-                  maxLines: width <= 520?1:2,
+                  return ListView.builder(
+                    physics: ClampingScrollPhysics(),
+                    itemCount: filteredListings.length,
+                    itemBuilder: (context, index) {
+                      var bookData = filteredListings[index];
+                      Timestamp timestamp = bookData['postedDate'];
+                      String uid = bookData['listingId'];
+                      bool approval = bookData['approval'] ?? false;
 
-                  'Product Brand',
-                  style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
-                      color: primaryColor),
-                  textAlign: TextAlign.center),
-            ),
-             Expanded(
-              child: Text(
-                  overflow:  width <= 520?TextOverflow.ellipsis:TextOverflow.visible,
-                  maxLines: width <= 520?1:2,
-
-                  'Date',
-                  style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
-                      color: primaryColor),
-                  textAlign: TextAlign.center),
-            ),
-             Expanded(
-              child: Text(
-                  overflow:  width <= 520?TextOverflow.ellipsis:TextOverflow.visible,
-                  maxLines: width <= 520?1:2,
-                  'Product Price',
-                  style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
-                      color: primaryColor),
-                  textAlign: TextAlign.center),
-            ),
-          ],
-        ),
-        Expanded(
-          child: StreamBuilder<QuerySnapshot>(
-            stream: fireStore.collection('productsListing').snapshots(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return Center(
-                  child: CircularProgressIndicator(),
-                );
-              } else if (snapshot.hasError) {
-                return Center(
-                  child: Text('Error Loading Data'),
-                );
-              } else if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                return Center(
-                  child: Text('No Listings Found'),
-                );
-              } else {
-                List<Map<String, dynamic>> listings =
-                    snapshot.data!.docs.map((doc) {
-                  return {
-                    'productImages': doc['productImages'],
-                    'productName': doc['productName'],
-                    'category': doc['category'],
-                    'brand': doc['brand'],
-                    'productCondition': doc['productCondition'],
-                    'productPrice': doc['productPrice'],
-                    'postedDate': doc['postedDate'],
-                    'sellerId': doc['sellerId'],
-                    'Description': doc['Description'],
-                    'approval': doc['approval'],
-                    'size': doc['size'],
-                    'listingId': doc.id,
-                  };
-                }).toList();
-
-                // Apply search query filter
-                List<Map<String, dynamic>> filteredListings =
-                    listings.where((listing) {
-                  String productName = listing['productName'] ?? '';
-
-                  return productName
-                      .toLowerCase()
-                      .contains(searchQuery.toLowerCase());
-                }).toList();
-
-                return ListView.builder(
-                  physics: ClampingScrollPhysics(),
-                  itemCount: filteredListings.length,
-                  itemBuilder: (context, index) {
-                    var bookData = filteredListings[index];
-                    Timestamp timestamp = bookData['postedDate'];
-                    String uid = bookData['listingId'];
-                    bool approval = bookData['approval'] ?? false;
-
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8.0, vertical: 5),
-                      child: GestureDetector(
-                        onTap: () {
-                          // showBookDetailDialog(context, bookData);
-                        },
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Container(
-                                    width: 70,
-                                    height: 70,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      image: DecorationImage(
-                                        image: NetworkImage(
-                                            bookData['productImages'][0] ?? ''),
-                                        fit: BoxFit.cover,
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8.0, vertical: 5),
+                        child: GestureDetector(
+                          onTap: () {
+                            // showBookDetailDialog(context, bookData);
+                          },
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Container(
+                                      width: 70,
+                                      height: 70,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        image: DecorationImage(
+                                          image: NetworkImage(
+                                              bookData['productImages'][0] ??
+                                                  ''),
+                                          fit: BoxFit.contain,
+                                        ),
                                       ),
                                     ),
                                   ),
+                                  Expanded(
+                                      child: Text(
+                                          style: TextStyle(
+                                              color: secondaryColor,
+                                              fontWeight: FontWeight.w400,
+                                              fontSize: 15),
+                                          bookData['productName'] ?? 'N/A',
+                                          textAlign: TextAlign.center)),
+                                  Expanded(
+                                      child: Text(
+                                          style: TextStyle(
+                                              color: secondaryColor,
+                                              fontWeight: FontWeight.w400,
+                                              fontSize: 15),
+                                          bookData['brand'] ?? 'N/A',
+                                          textAlign: TextAlign.center)),
+                                  Expanded(
+                                      child: Text(
+                                          overflow: width <= 520
+                                              ? TextOverflow.ellipsis
+                                              : TextOverflow.visible,
+                                          maxLines: 1,
+                                          style: TextStyle(
+                                              color: secondaryColor,
+                                              fontWeight: FontWeight.w400,
+                                              fontSize: 15),
+                                          _formatTimestamp(timestamp),
+                                          textAlign: TextAlign.center)),
+                                  Expanded(
+                                      child: Text(
+                                          style: TextStyle(
+                                              color: secondaryColor,
+                                              fontWeight: FontWeight.w400,
+                                              fontSize: 15),
+                                          "\$${bookData['productPrice'] ?? 'N/A'}",
+                                          textAlign: TextAlign.center)),
+                                  // Expanded(
+                                  //   child: Row(
+                                  //     children: [
+                                  //       SizedBox(width: 50),
+                                  //       Text(
+                                  //         approval
+                                  //             ? 'Approved'
+                                  //             : 'Approval\npending',
+                                  //         style: TextStyle(
+                                  //             color: approval
+                                  //                 ? Colors.green
+                                  //                 : Colors.red),
+                                  //       ),
+                                  //       SizedBox(width: 5),
+                                  //       IconButton(
+                                  //         onPressed: () {
+                                  //           // showBanConfirmationDialog(
+                                  //           //     context, uid, approval);
+                                  //         },
+                                  //         icon: Icon(Icons.edit,
+                                  //             color: Colors.white),
+                                  //       ),
+                                  //     ],
+                                  //   ),
+                                  // ),
+                                ],
+                              ),
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 50),
+                                child: Divider(
+                                  color: Colors.grey,
+                                  thickness: 2,
                                 ),
-                                Expanded(
-                                    child: Text(
-                                        style: TextStyle(
-                                            color: secondaryColor,
-                                            fontWeight: FontWeight.w400,
-                                            fontSize: 15),
-                                        bookData['productName'] ?? 'N/A',
-                                        textAlign: TextAlign.center)),
-                                Expanded(
-                                    child: Text(
-                                        style: TextStyle(
-                                            color: secondaryColor,
-                                            fontWeight: FontWeight.w400,
-                                            fontSize: 15),
-                                        bookData['brand'] ?? 'N/A',
-                                        textAlign: TextAlign.center)),
-                                Expanded(
-                                    child: Text(
-                                        overflow:  width <= 520?TextOverflow.ellipsis:TextOverflow.visible,
-                                        maxLines: 1,
-                                        style: TextStyle(
-                                            color: secondaryColor,
-                                            fontWeight: FontWeight.w400,
-                                            fontSize: 15),
-                                        _formatTimestamp(timestamp),
-                                        textAlign: TextAlign.center)),
-                                Expanded(
-                                    child: Text(
-                                        style: TextStyle(
-                                            color: secondaryColor,
-                                            fontWeight: FontWeight.w400,
-                                            fontSize: 15),
-                                        "\$${bookData['productPrice'] ?? 'N/A'}",
-                                        textAlign: TextAlign.center)),
-                                // Expanded(
-                                //   child: Row(
-                                //     children: [
-                                //       SizedBox(width: 50),
-                                //       Text(
-                                //         approval
-                                //             ? 'Approved'
-                                //             : 'Approval\npending',
-                                //         style: TextStyle(
-                                //             color: approval
-                                //                 ? Colors.green
-                                //                 : Colors.red),
-                                //       ),
-                                //       SizedBox(width: 5),
-                                //       IconButton(
-                                //         onPressed: () {
-                                //           // showBanConfirmationDialog(
-                                //           //     context, uid, approval);
-                                //         },
-                                //         icon: Icon(Icons.edit,
-                                //             color: Colors.white),
-                                //       ),
-                                //     ],
-                                //   ),
-                                // ),
-                              ],
-                            ),
-                            Divider(
-                              color: Colors.grey,
-                              thickness: 2,
-                            ),
-                          ],
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    );
-                  },
-                );
-              }
-            },
+                      );
+                    },
+                  );
+                }
+              },
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

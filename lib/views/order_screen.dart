@@ -79,167 +79,176 @@ class _Order_ScreenState extends State<Order_Screen> {
         //     ],
         //   ),
         // ),
-        body: Column(
-          children: [
-            Row(
-              mainAxisAlignment: Get.width < 768
-                  ? MainAxisAlignment.start
-                  : MainAxisAlignment.center,
-              children: [
-                SizedBox(
-                  width: 20,
-                ),
-                Get.width < 768
-                    ? GestureDetector(
-                        onTap: () {
-                          sidebarController.showsidebar.value = true;
-                        },
-                        child: SvgPicture.asset(
-                          'assets/images/drawernavigation.svg',
-                          colorFilter:
-                              ColorFilter.mode(primaryColor, BlendMode.srcIn),
-                        ),
-                      )
-                    : SizedBox.shrink(),
-                Padding(
-                  padding:  EdgeInsets.only(      left: width <= 375
-                      ? 10
-                      : width <= 520
-                      ? 10 // You can specify the width for widths less than 425
-                      : width < 768
-                      ? 15 // You can specify the width for widths less than 768
-                      : width < 1024
-                      ? 15 // You can specify the width for widths less than 1024
-                      : width <= 1440
-                      ? 15
-                      : width > 1440 && width <= 2550
-                      ? 15
-                      : 15, top: 20, bottom: 20),
-                  child: SizedBox(
-                    width: width <= 375
-                        ? 200
-                        : width <= 425
-                        ? 240:
-                    width <= 520
-                        ? 260 // You can specify the width for widths less than 425
+        body: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 100,vertical: 20),
+
+
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: Get.width < 768
+                    ? MainAxisAlignment.start
+                    : MainAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    width: 20,
+                  ),
+                  Get.width < 768
+                      ? GestureDetector(
+                          onTap: () {
+                            sidebarController.showsidebar.value = true;
+                          },
+                          child: SvgPicture.asset(
+                            'assets/images/drawernavigation.svg',
+                            colorFilter:
+                                ColorFilter.mode(primaryColor, BlendMode.srcIn),
+                          ),
+                        )
+                      : SizedBox.shrink(),
+                  Padding(
+                    padding:  EdgeInsets.only(      left: width <= 375
+                        ? 10
+                        : width <= 520
+                        ? 10 // You can specify the width for widths less than 425
                         : width < 768
-                        ? 370 // You can specify the width for widths less than 768
+                        ? 15 // You can specify the width for widths less than 768
                         : width < 1024
-                        ? 400 // You can specify the width for widths less than 1024
+                        ? 15 // You can specify the width for widths less than 1024
                         : width <= 1440
-                        ? 500
+                        ? 15
                         : width > 1440 && width <= 2550
-                        ? 500
-                        : 800,
-                    child: TextField(
-                      onChanged: (value) {
-                        setState(() {
-                          searchQuery = value;
-                        });
-                      },
-                      decoration: InputDecoration(
-                        hintText: "Search",
-                        fillColor: primaryColor,
-                        filled: true,
-                        border: const OutlineInputBorder(
-                          borderSide: BorderSide.none,
-                          borderRadius: BorderRadius.all(Radius.circular(10)),
-                        ),
-                        suffixIcon: Container(
-                          padding: const EdgeInsets.all(defaultPadding * 0.75),
-                          margin: const EdgeInsets.symmetric(
-                              horizontal: defaultPadding / 2),
-                          decoration: const BoxDecoration(
-                            color: primaryColor,
+                        ? 15
+                        : 15, top: 20, bottom: 20),
+                    child: SizedBox(
+                      width: width <= 375
+                          ? 200
+                          : width <= 425
+                          ? 240:
+                      width <= 520
+                          ? 260 // You can specify the width for widths less than 425
+                          : width < 768
+                          ? 370 // You can specify the width for widths less than 768
+                          : width < 1024
+                          ? 400 // You can specify the width for widths less than 1024
+                          : width <= 1440
+                          ? 500
+                          : width > 1440 && width <= 2550
+                          ? 500
+                          : 800,
+                      child: TextField(
+                        onChanged: (value) {
+                          setState(() {
+                            searchQuery = value;
+                          });
+                        },
+                        decoration: InputDecoration(
+                          hintText: "Search",
+                          fillColor: primaryColor,
+                          filled: true,
+                          border: const OutlineInputBorder(
+                            borderSide: BorderSide.none,
                             borderRadius: BorderRadius.all(Radius.circular(10)),
                           ),
-                          child: const Icon(
-                            Icons.search,
-                            color: Colors.white,
+                          suffixIcon: Container(
+                            padding: const EdgeInsets.all(defaultPadding * 0.75),
+                            margin: const EdgeInsets.symmetric(
+                                horizontal: defaultPadding / 2),
+                            decoration: const BoxDecoration(
+                              color: primaryColor,
+                              borderRadius: BorderRadius.all(Radius.circular(10)),
+                            ),
+                            child: const Icon(
+                              Icons.search,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                       ),
                     ),
                   ),
+                ],
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+
+                child: Row(
+                  // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Expanded(
+                        child: Text(
+                            overflow:  width <= 520?TextOverflow.ellipsis:TextOverflow.visible,
+                            maxLines: width <= 520?1:2,
+                            'Image',
+                            style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w500,
+                                color: primaryColor),
+                            textAlign: TextAlign.center)),
+                    Expanded(
+                        child: Text(
+                            overflow:  width <= 520?TextOverflow.ellipsis:TextOverflow.visible,
+                            maxLines: width <= 520?1:2,
+                            'Title',
+                            style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w500,
+                                color: primaryColor),
+                            textAlign: TextAlign.center)),
+                    Expanded(
+                        child: Text(
+                            overflow:  width <= 520?TextOverflow.ellipsis:TextOverflow.visible,
+                            maxLines: width <= 520?1:2,
+                            'Buyer',
+                            style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w500,
+                                color: primaryColor),
+                            textAlign: TextAlign.center)),
+                    Expanded(
+                        child: Text(
+                            overflow:  width <= 520?TextOverflow.ellipsis:TextOverflow.visible,
+                            maxLines: width <= 520?1:2,
+                            'Seller',
+                            style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w500,
+                                color: primaryColor),
+                            textAlign: TextAlign.center)),
+                    Expanded(
+                        child: Text(
+                            overflow:  width <= 520?TextOverflow.ellipsis:TextOverflow.visible,
+                            maxLines: width <= 520?1:2,
+                            'Date',
+                            style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w500,
+                                color: primaryColor),
+                            textAlign: TextAlign.center)),
+                    Expanded(
+                        child: Text(
+                            overflow:  width <= 520?TextOverflow.ellipsis:TextOverflow.visible,
+                            maxLines: width <= 520?1:2,
+                            'Price',
+                            style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w500,
+                                color: primaryColor),
+                            textAlign: TextAlign.center)),
+                    // Expanded(
+                    //     child: Text('Delivery Status',
+                    //         style: TextStyle(
+                    //             fontSize: 18,
+                    //             fontWeight: FontWeight.w500,
+                    //             color: Colors.blue),
+                    //         textAlign: TextAlign.center)),
+                  ],
                 ),
-              ],
-            ),
-            Row(
-              // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Expanded(
-                    child: Text(
-                        overflow:  width <= 520?TextOverflow.ellipsis:TextOverflow.visible,
-                        maxLines: width <= 520?1:2,
-                        'Product Images',
-                        style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w500,
-                            color: primaryColor),
-                        textAlign: TextAlign.center)),
-                Expanded(
-                    child: Text(
-                        overflow:  width <= 520?TextOverflow.ellipsis:TextOverflow.visible,
-                        maxLines: width <= 520?1:2,
-                        'Product Name',
-                        style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w500,
-                            color: primaryColor),
-                        textAlign: TextAlign.center)),
-                Expanded(
-                    child: Text(
-                        overflow:  width <= 520?TextOverflow.ellipsis:TextOverflow.visible,
-                        maxLines: width <= 520?1:2,
-                        'Buyer Name',
-                        style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w500,
-                            color: primaryColor),
-                        textAlign: TextAlign.center)),
-                Expanded(
-                    child: Text(
-                        overflow:  width <= 520?TextOverflow.ellipsis:TextOverflow.visible,
-                        maxLines: width <= 520?1:2,
-                        'Seller Name',
-                        style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w500,
-                            color: primaryColor),
-                        textAlign: TextAlign.center)),
-                Expanded(
-                    child: Text(
-                        overflow:  width <= 520?TextOverflow.ellipsis:TextOverflow.visible,
-                        maxLines: width <= 520?1:2,
-                        'Order Date',
-                        style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w500,
-                            color: primaryColor),
-                        textAlign: TextAlign.center)),
-                Expanded(
-                    child: Text(
-                        overflow:  width <= 520?TextOverflow.ellipsis:TextOverflow.visible,
-                        maxLines: width <= 520?1:2,
-                        'Buying Price',
-                        style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w500,
-                            color: primaryColor),
-                        textAlign: TextAlign.center)),
-                // Expanded(
-                //     child: Text('Delivery Status',
-                //         style: TextStyle(
-                //             fontSize: 18,
-                //             fontWeight: FontWeight.w500,
-                //             color: Colors.blue),
-                //         textAlign: TextAlign.center)),
-              ],
-            ),
-            Expanded(
-              child: _buildOrderList(true),
-            ),
-          ],
+              ),
+              Expanded(
+                child: _buildOrderList(true),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -384,7 +393,11 @@ class _Order_ScreenState extends State<Order_Screen> {
                             // ),
                           ],
                         ),
-                        const Divider(color: Colors.grey, thickness: 2),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 50),
+
+                          child: const Divider(color: Colors.grey, thickness: 2),
+                        ),
                       ],
                     );
                   },

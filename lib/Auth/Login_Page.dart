@@ -18,33 +18,17 @@ class _LoginPageState extends State<LoginPage> {
   bool isPasswordVisible = false;
   FirebaseAuth auth = FirebaseAuth.instance;
   FirebaseFirestore firestore = FirebaseFirestore.instance;
+  final UserController userController = Get.put(UserController());
 
-  // void login() async {
-  //   try {
-  //
-  //     UserCredential userCredential =
-  //     await FirebaseAuth.instance.signInWithEmailAndPassword(
-  //       email: emailController.text,
-  //       password: passwordController.text,
-  //     );
-  //     String? uid = userCredential.user?.uid;
-  //     print("Admin UID: $uid");
-  //
-  //     final UserController userController = Get.put(UserController());
-  //     userController.setUid(uid!); // Update the controller with the UID
-  //     Get.offAll(() => MainDashboard()); // Navigate to MainDashboard
-  //   } catch (e) {
-  //     print("Login Error: $e"); // Print the error to the terminal
-  //     Get.snackbar("Login Error", e.toString());
-  //   }
-  // }
   void login() async {
     try {
+      userController.isLoading.value = true;
       // Sign in with email and password
+
       UserCredential userCredential =
           await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: emailController.text,
-        password: passwordController.text,
+        email: emailController.text.trim(),
+        password: passwordController.text.trim(),
       );
       String? uid = userCredential.user?.uid;
       print("Admin UID: $uid");
@@ -58,18 +42,21 @@ class _LoginPageState extends State<LoginPage> {
       if (isAdmin) {
         print("Admin logged in: $uid");
 
-        final UserController userController = Get.put(UserController());
-        userController.setUid(uid!); // Update the controller with the UID
+        userController.setUid(uid!);
+        Get.snackbar("Success", "Login",backgroundColor: Colors.black,colorText: Colors.white);
+        // Update the controller with the UID
         Get.offAll(() => HomeMain()); // Navigate to MainDashboard
       } else {
         await FirebaseAuth.instance.signOut();
 
         print("User is not an admin");
-        Get.snackbar("Access Denied", "You do not have admin privileges.");
+        Get.snackbar("Access Denied", "You do not have admin privileges.",backgroundColor: Colors.black,colorText: Colors.white);
       }
+      userController.isLoading.value = false;
     } catch (e) {
       print("Login Error: $e"); // Print the error to the terminal
-      Get.snackbar("Login Error", e.toString());
+      Get.snackbar("Login Error", e.toString(),backgroundColor: Colors.black,colorText: Colors.white);
+      userController.isLoading.value = false;
     }
   }
 
@@ -252,28 +239,35 @@ class _LoginPageState extends State<LoginPage> {
                                 ? 300
                                 : 700,
               ),
-              Container(
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: primaryColor,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.3),
-                      blurRadius: 2,
-                    ),
-                  ],
-                ),
-                child: IconButton(
-                  color: Colors.white,
-                  onPressed: login,
-                  icon: Transform.scale(
-                    scale: 0.5,
-                    child: Image.asset('assets/images/forward.png'),
+              Obx(() {
+                return Container(
+                  width: 50,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: primaryColor,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.3),
+                        blurRadius: 2,
+                      ),
+                    ],
                   ),
-                ),
-              ),
+                  child: userController.isLoading.value == true
+                      ? Center(
+                          child: CircularProgressIndicator(
+                          color: Colors.white,
+                        ))
+                      : IconButton(
+                          color: Colors.white,
+                          onPressed: login,
+                          icon: Transform.scale(
+                            scale: 0.5,
+                            child: Image.asset('assets/images/forward.png'),
+                          ),
+                        ),
+                );
+              }),
             ],
           ),
           SizedBox(
@@ -287,6 +281,7 @@ class _LoginPageState extends State<LoginPage> {
 
 class UserController extends GetxController {
   var uid = ''.obs; // Observable
+  RxBool isLoading = false.obs;
 
   void setUid(String uid) {
     this.uid.value = uid; // Update the observable value

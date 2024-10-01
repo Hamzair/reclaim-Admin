@@ -248,6 +248,19 @@ class _ExampleSidebarXState extends State<ExampleSidebarX> {
               onTap: () {
                 sidebarController.selectedindex.value = 3;
 
+                // setNameProvider.setName('Previous Bookings');
+              },
+              iconBuilder: (selected, hovered) {
+                return Icon(
+                  Icons.home,
+                  color: Colors.transparent,
+                );
+              },
+              label: 'User Chats'),
+          SidebarXItem(
+              onTap: () {
+                sidebarController.selectedindex.value = 4;
+
                 // setNameProvider.setName('Profile');
               },
               iconBuilder: (selected, hovered) {

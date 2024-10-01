@@ -4,6 +4,7 @@ import '../views/UserData.dart';
 import '../views/order_screen.dart';
 import '../views/products_listing.dart';
 import '../views/user_pending.dart';
+import '../views/userchats.dart';
 import 'home_main.dart';
 import '../controller/sidebarController.dart';
 
@@ -38,7 +39,9 @@ class _HomeMainState extends State<HomeMain> {
                             ? Order_Screen()
                             : sidebarController.selectedindex.value == 2
                                 ? UserData()
-                                : UserPending()))
+                                : sidebarController.selectedindex.value == 3
+                                    ? Userchats()
+                                    : UserPending()))
               ],
             ),
             Obx(
