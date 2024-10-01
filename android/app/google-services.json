@@ -1,0 +1,162 @@
+{
+  "project_info": {
+    "project_number": "283889365166",
+    "project_id": "reclaimapp-fc1b9",
+    "storage_bucket": "reclaimapp-fc1b9.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:283889365166:android:c3b245a774fc61e78b3d3f",
+        "android_client_info": {
+          "package_name": "com.example.Creek_admin_web"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "283889365166-k6bhmnfdthqga1632uc2fbmre2df8ahd.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBYAIJKGm7dFEoTRVkwpXft4B_-hAazSLQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "283889365166-k6bhmnfdthqga1632uc2fbmre2df8ahd.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "283889365166-brpp4id4adimjli7oc2bmut5kndi6jvj.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.reclaimFirebaseApp"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:283889365166:android:8ee9b00118be78998b3d3f",
+        "android_client_info": {
+          "package_name": "com.example.reclaim_admin"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "283889365166-k6bhmnfdthqga1632uc2fbmre2df8ahd.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBYAIJKGm7dFEoTRVkwpXft4B_-hAazSLQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "283889365166-k6bhmnfdthqga1632uc2fbmre2df8ahd.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "283889365166-brpp4id4adimjli7oc2bmut5kndi6jvj.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.reclaimFirebaseApp"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:283889365166:android:63456322de87163f8b3d3f",
+        "android_client_info": {
+          "package_name": "com.example.reclaim_firebase_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "283889365166-5jaatu9okqpvmepvva9hf60khs9fvh3v.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.reclaim_firebase_app",
+            "certificate_hash": "8b503ab756bfb4fe0d664e061864ba6ff2a372e7"
+          }
+        },
+        {
+          "client_id": "283889365166-k6bhmnfdthqga1632uc2fbmre2df8ahd.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBYAIJKGm7dFEoTRVkwpXft4B_-hAazSLQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "283889365166-k6bhmnfdthqga1632uc2fbmre2df8ahd.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "283889365166-brpp4id4adimjli7oc2bmut5kndi6jvj.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.reclaimFirebaseApp"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:283889365166:android:763aca76c0e9a8158b3d3f",
+        "android_client_info": {
+          "package_name": "com.example.reclaimapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "283889365166-k6bhmnfdthqga1632uc2fbmre2df8ahd.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBYAIJKGm7dFEoTRVkwpXft4B_-hAazSLQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "283889365166-k6bhmnfdthqga1632uc2fbmre2df8ahd.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "283889365166-brpp4id4adimjli7oc2bmut5kndi6jvj.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.reclaimFirebaseApp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

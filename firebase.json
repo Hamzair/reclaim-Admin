@@ -1,0 +1,33 @@
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "reclaimapp-fc1b9",
+          "appId": "1:283889365166:android:8ee9b00118be78998b3d3f",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "reclaimapp-fc1b9",
+          "configurations": {
+            "android": "1:283889365166:android:8ee9b00118be78998b3d3f",
+            "ios": "1:283889365166:ios:398a9dcc5ea2b8418b3d3f",
+            "macos": "1:283889365166:ios:398a9dcc5ea2b8418b3d3f",
+            "web": "1:283889365166:web:793c06402e5014058b3d3f",
+            "windows": "1:283889365166:web:793c06402e5014058b3d3f"
+          }
+        }
+      }
+    }
+  },
+  "hosting": {
+    "public": "build/web",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ]
+  }
+}
