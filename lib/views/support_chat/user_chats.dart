@@ -162,7 +162,7 @@ class LastMessageText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return   StreamBuilder<QuerySnapshot>(
-      stream:  FirebaseFirestore.instance.collection('supportChat').doc(userId).collection('messages').orderBy('timestamp').snapshots(),
+      stream:  FirebaseFirestore.instance.collection('supportChat').doc(userId).collection('messages').orderBy('timestamp',descending: true).snapshots(),
       builder: (context, lastmessagesnap) {
         if(lastmessagesnap.connectionState==ConnectionState.waiting){
           return SizedBox.shrink();

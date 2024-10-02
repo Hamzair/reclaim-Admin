@@ -133,7 +133,7 @@ onSubmitted: (val)async{
                         UserProfileDetail(userId: userId,role: "User",),
                         SizedBox(width: 10,),
                         Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
+                          crossAxisAlignment:isAdmin ?CrossAxisAlignment.end: CrossAxisAlignment.start,
                           children: [
                             Container(
                               constraints: BoxConstraints(
