@@ -1,10 +1,11 @@
+import 'package:Reclaim_admin_panel/views/support_chat/user_chats.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../views/UserData.dart';
 import '../views/order_screen.dart';
 import '../views/products_listing.dart';
 import '../views/user_pending.dart';
-import '../views/userchats.dart';
+import '../views/user_chats/order_chats.dart';
 import 'home_main.dart';
 import '../controller/sidebarController.dart';
 
@@ -40,8 +41,12 @@ class _HomeMainState extends State<HomeMain> {
                             : sidebarController.selectedindex.value == 2
                                 ? UserData()
                                 : sidebarController.selectedindex.value == 3
-                                    ? Userchats()
-                                    : UserPending()))
+                                    ? OrderUserChats()
+                        : sidebarController.selectedindex.value == 4
+                        ? UserPending()
+                        : sidebarController.selectedindex.value == 5
+                        ? SupportUserChats()
+                                : UserPending()))
               ],
             ),
             Obx(

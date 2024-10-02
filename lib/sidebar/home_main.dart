@@ -272,6 +272,19 @@ class _ExampleSidebarXState extends State<ExampleSidebarX> {
               label: 'User Pendings'),
           SidebarXItem(
               onTap: () {
+                sidebarController.selectedindex.value = 5;
+
+                // setNameProvider.setName('Profile');
+              },
+              iconBuilder: (selected, hovered) {
+                return Icon(
+                  Icons.home,
+                  color: Colors.transparent,
+                );
+              },
+              label: 'Support Chat'),
+          SidebarXItem(
+              onTap: () {
                 sidebarController.selectedindex.value = 0;
                 sidebarController.controller =
                     SidebarXController(selectedIndex: 0, extended: true);

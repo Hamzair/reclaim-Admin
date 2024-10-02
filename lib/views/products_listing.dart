@@ -406,7 +406,7 @@ class _BookListViewState extends State<BookListView> {
                       'postedDate': doc['postedDate'],
                       'sellerId': doc['sellerId'],
                       'Description': doc['Description'],
-                      'approval': doc['approval'],
+                      // 'approval': doc['approval'],
                       'size': doc['size'],
                       'listingId': doc.id,
                     };
@@ -450,9 +450,7 @@ class _BookListViewState extends State<BookListView> {
                                       decoration: BoxDecoration(
                                         shape: BoxShape.circle,
                                         image: DecorationImage(
-                                          image: NetworkImage(
-                                              bookData['productImages'][0] ??
-                                                  ''),
+                                          image: NetworkImage(bookData['productImages'][0] ?? ''),
                                           fit: BoxFit.contain,
                                         ),
                                       ),
@@ -511,7 +509,9 @@ class _BookListViewState extends State<BookListView> {
                                   //       IconButton(
                                   //         onPressed: () {
                                   //           // showBanConfirmationDialog(
-                                  //           //     context, uid, approval);
+                                  //           //     context, uid,
+                                  //
+                                  //           );
                                   //         },
                                   //         icon: Icon(Icons.edit,
                                   //             color: Colors.white),
