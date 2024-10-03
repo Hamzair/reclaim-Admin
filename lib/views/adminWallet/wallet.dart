@@ -48,46 +48,49 @@ class _WalletState extends State<Wallet> {
                 ),
                 Get.width < 768
                     ? GestureDetector(
-                  onTap: () {
-                    sidebarController.showsidebar.value = true;
-                  },
-                  child: SvgPicture.asset(
-                    'assets/images/drawernavigation.svg',
-                    colorFilter:
-                    ColorFilter.mode(primaryColor, BlendMode.srcIn),
-                  ),
-                )
+                        onTap: () {
+                          sidebarController.showsidebar.value = true;
+                        },
+                        child: SvgPicture.asset(
+                          'assets/images/drawernavigation.svg',
+                          colorFilter:
+                              ColorFilter.mode(primaryColor, BlendMode.srcIn),
+                        ),
+                      )
                     : SizedBox.shrink(),
                 Padding(
-                  padding:  EdgeInsets.only(      left: width <= 375
-                      ? 10
-                      : width <= 520
-                      ? 10 // You can specify the width for widths less than 425
-                      : width < 768
-                      ? 15 // You can specify the width for widths less than 768
-                      : width < 1024
-                      ? 15 // You can specify the width for widths less than 1024
-                      : width <= 1440
-                      ? 15
-                      : width > 1440 && width <= 2550
-                      ? 15
-                      : 15, top: 20, bottom: 20),
+                  padding: EdgeInsets.only(
+                      left: width <= 375
+                          ? 10
+                          : width <= 520
+                              ? 10 // You can specify the width for widths less than 425
+                              : width < 768
+                                  ? 15 // You can specify the width for widths less than 768
+                                  : width < 1024
+                                      ? 15 // You can specify the width for widths less than 1024
+                                      : width <= 1440
+                                          ? 15
+                                          : width > 1440 && width <= 2550
+                                              ? 15
+                                              : 15,
+                      top: 20,
+                      bottom: 20),
                   child: SizedBox(
                     width: width <= 375
                         ? 200
                         : width <= 425
-                        ? 240:
-                    width <= 520
-                        ? 260 // You can specify the width for widths less than 425
-                        : width < 768
-                        ? 370 // You can specify the width for widths less than 768
-                        : width < 1024
-                        ? 400 // You can specify the width for widths less than 1024
-                        : width <= 1440
-                        ? 500
-                        : width > 1440 && width <= 2550
-                        ? 500
-                        : 800,
+                            ? 240
+                            : width <= 520
+                                ? 260 // You can specify the width for widths less than 425
+                                : width < 768
+                                    ? 370 // You can specify the width for widths less than 768
+                                    : width < 1024
+                                        ? 400 // You can specify the width for widths less than 1024
+                                        : width <= 1440
+                                            ? 500
+                                            : width > 1440 && width <= 2550
+                                                ? 500
+                                                : 800,
                     child: TextField(
                       onChanged: (value) {
                         setState(() {
@@ -124,16 +127,16 @@ class _WalletState extends State<Wallet> {
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 10),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: const [
-                  SizedBox(width: 65),
+                  // SizedBox(width: 65),
                   Expanded(
                       child: Text(
                     'Role',
                     style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w500,
-                        color:primaryColor),
+                        color: primaryColor),
                     textAlign: TextAlign.center,
                   )),
                   Expanded(
@@ -144,11 +147,11 @@ class _WalletState extends State<Wallet> {
                               color: primaryColor),
                           textAlign: TextAlign.center)),
                   Expanded(
-                      child: Text('Transaction History',
+                      child: Text('Transactions',
                           style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.w500,
-                              color:primaryColor),
+                              color: primaryColor),
                           textAlign: TextAlign.center)),
                 ],
               ),
@@ -185,9 +188,9 @@ class _WalletState extends State<Wallet> {
                         child: Column(
                           children: [
                             Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               children: [
-                                SizedBox(width: 65),
+                                // SizedBox(width: 65),
                                 Expanded(
                                   child: Text(
                                     style: TextStyle(
@@ -231,9 +234,13 @@ class _WalletState extends State<Wallet> {
                                 ),
                               ],
                             ),
-                            Divider(
-                              color: Colors.grey,
-                              thickness: 2,
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 50),
+                              child: Divider(
+                                color: Colors.grey,
+                                thickness: 2,
+                              ),
                             ),
                           ],
                         ),

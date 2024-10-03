@@ -3,8 +3,11 @@ import 'package:Reclaim_admin_panel/views/support_chat/user_messages.dart';
 import 'package:Reclaim_admin_panel/views/user_chats/order_messages.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+
+import '../../controller/sidebarController.dart';
 
 class SupportUserChats extends StatefulWidget {
   const SupportUserChats({super.key});
@@ -15,6 +18,8 @@ class SupportUserChats extends StatefulWidget {
 
 class _SupportUserChatsState extends State<SupportUserChats> {
   TextEditingController searchController = TextEditingController();
+  final SidebarController sidebarController = Get.put(SidebarController());
+
   String searchQuery = '';
   @override
   Widget build(BuildContext context) {
@@ -24,6 +29,90 @@ class _SupportUserChatsState extends State<SupportUserChats> {
       body: SafeArea(
         child: Column(
           children: [
+            SizedBox(height: 20,),
+            Row(
+              mainAxisAlignment: Get.width < 768
+                  ? MainAxisAlignment.start
+                  : MainAxisAlignment.center,
+              children: [
+                SizedBox(
+                  width: 20,
+                ),
+                Get.width < 768
+                    ? GestureDetector(
+                  onTap: () {
+                    sidebarController.showsidebar.value = true;
+                  },
+                  child: SvgPicture.asset(
+                    'assets/images/drawernavigation.svg',
+                    colorFilter:
+                    ColorFilter.mode(primaryColor, BlendMode.srcIn),
+                  ),
+                )
+                    : SizedBox.shrink(),
+                Padding(
+                  padding:  EdgeInsets.only(      left: width <= 375
+                      ? 10
+                      : width <= 520
+                      ? 10 // You can specify the width for widths less than 425
+                      : width < 768
+                      ? 15 // You can specify the width for widths less than 768
+                      : width < 1024
+                      ? 15 // You can specify the width for widths less than 1024
+                      : width <= 1440
+                      ? 15
+                      : width > 1440 && width <= 2550
+                      ? 15
+                      : 15, top: 20, bottom: 20),
+                  child: SizedBox(
+                    width: width <= 375
+                        ? 200
+                        : width <= 425
+                        ? 240:
+                    width <= 520
+                        ? 260 // You can specify the width for widths less than 425
+                        : width < 768
+                        ? 370 // You can specify the width for widths less than 768
+                        : width < 1024
+                        ? 400 // You can specify the width for widths less than 1024
+                        : width <= 1440
+                        ? 500
+                        : width > 1440 && width <= 2550
+                        ? 500
+                        : 800,
+                    child: TextField(
+                      onChanged: (value) {
+                        setState(() {
+                          searchQuery = value;
+                        });
+                      },
+                      decoration: InputDecoration(
+                        hintText: "Search",
+                        fillColor: primaryColor,
+                        filled: true,
+                        border: const OutlineInputBorder(
+                          borderSide: BorderSide.none,
+                          borderRadius: BorderRadius.all(Radius.circular(10)),
+                        ),
+                        suffixIcon: Container(
+                          padding: const EdgeInsets.all(defaultPadding * 0.75),
+                          margin: const EdgeInsets.symmetric(
+                              horizontal: defaultPadding / 2),
+                          decoration: const BoxDecoration(
+                            color: primaryColor,
+                            borderRadius: BorderRadius.all(Radius.circular(10)),
+                          ),
+                          child: const Icon(
+                            Icons.search,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
             SizedBox(height: 20,),
             // Padding(
             //   padding: EdgeInsets.only(

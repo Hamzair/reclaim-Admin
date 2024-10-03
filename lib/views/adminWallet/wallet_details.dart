@@ -26,7 +26,7 @@ class WalletDetail extends StatelessWidget {
                 SizedBox(width: 65),
                 Expanded(
                     child: Text(
-                  'App Fees',
+                  'Fees',
                   style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w500,
@@ -41,14 +41,14 @@ class WalletDetail extends StatelessWidget {
                             color: primaryColor),
                         textAlign: TextAlign.center)),
                 Expanded(
-                    child: Text('Transaction Name',
+                    child: Text('Name',
                         style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w500,
                             color:primaryColor),
                         textAlign: TextAlign.center)),
                 Expanded(
-                    child: Text('Transaction Type',
+                    child: Text('Type',
                         style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w500,

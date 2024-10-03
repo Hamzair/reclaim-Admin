@@ -25,9 +25,9 @@ class WithdrawalRequest extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 10),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: const [
-                SizedBox(width: 65),
+                // SizedBox(width: 65),
                 Expanded(
                   child: Text(
                     'Amount',
@@ -40,7 +40,7 @@ class WithdrawalRequest extends StatelessWidget {
                   ),
                 ),
                 Expanded(
-                  child: Text('Account Name',
+                  child: Text('Acc Name',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w500,
@@ -49,7 +49,7 @@ class WithdrawalRequest extends StatelessWidget {
                       textAlign: TextAlign.center),
                 ),
                 Expanded(
-                  child: Text('Account Number',
+                  child: Text('Acc No',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w500,
@@ -132,9 +132,9 @@ class WithdrawalRequest extends StatelessWidget {
                       child: Column(
                         children: [
                           Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
-                              SizedBox(width: 65),
+                              // SizedBox(width: 65),
                               Expanded(
                                 child: Text(
                                   style: TextStyle(

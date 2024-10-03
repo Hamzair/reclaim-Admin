@@ -2,7 +2,10 @@ import 'package:Reclaim_admin_panel/const/constants.dart';
 import 'package:Reclaim_admin_panel/views/user_chats/order_messages.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
+
+import '../../controller/sidebarController.dart';
 
 class OrderUserChats extends StatefulWidget {
   const OrderUserChats({super.key});
@@ -14,6 +17,8 @@ class OrderUserChats extends StatefulWidget {
 class _OrderUserChatsState extends State<OrderUserChats> {
   TextEditingController searchController = TextEditingController();
   String searchQuery = '';
+  final SidebarController sidebarController = Get.put(SidebarController());
+
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
@@ -23,9 +28,28 @@ class _OrderUserChatsState extends State<OrderUserChats> {
         child: Column(
           children: [
             SizedBox(height: 20,),
-            Padding(
-              padding: EdgeInsets.only(
-                  left: width <= 375
+            Row(
+              mainAxisAlignment: Get.width < 768
+                  ? MainAxisAlignment.start
+                  : MainAxisAlignment.center,
+              children: [
+                SizedBox(
+                  width: 20,
+                ),
+                Get.width < 768
+                    ? GestureDetector(
+                  onTap: () {
+                    sidebarController.showsidebar.value = true;
+                  },
+                  child: SvgPicture.asset(
+                    'assets/images/drawernavigation.svg',
+                    colorFilter:
+                    ColorFilter.mode(primaryColor, BlendMode.srcIn),
+                  ),
+                )
+                    : SizedBox.shrink(),
+                Padding(
+                  padding:  EdgeInsets.only(      left: width <= 375
                       ? 10
                       : width <= 520
                       ? 10 // You can specify the width for widths less than 425
@@ -37,57 +61,55 @@ class _OrderUserChatsState extends State<OrderUserChats> {
                       ? 15
                       : width > 1440 && width <= 2550
                       ? 15
-                      : 15,
-                  top: 20,
-                  bottom: 20),
-              child: SizedBox(
-                width: width <= 375
-                    ? 200
-                    : width <= 425
-                    ? 240
-                    : width <= 520
-                    ? 260 // You can specify the width for widths less than 425
-                    : width < 768
-                    ? 370 // You can specify the width for widths less than 768
-                    : width < 1024
-                    ? 400 // You can specify the width for widths less than 1024
-                    : width <= 1440
-                    ? 500
-                    : width > 1440 && width <= 2550
-                    ? 500
-                    : 800,
-                child: TextField(
-                  onChanged: (value) {
-                    setState(() {
-                      searchQuery = value;
-                    });
-                  },
-                  decoration: InputDecoration(
-                    hintText: "Search",
-                    fillColor: primaryColor,
-                    filled: true,
-                    border: OutlineInputBorder(
-                      borderSide: BorderSide.none,
-                      borderRadius:
-                      const BorderRadius.all(Radius.circular(10)),
-                    ),
-                    suffixIcon: Container(
-                      padding: EdgeInsets.all(defaultPadding * 0.75),
-                      margin: EdgeInsets.symmetric(
-                          horizontal: defaultPadding / 2),
-                      decoration: BoxDecoration(
-                        color: primaryColor,
-                        borderRadius:
-                        const BorderRadius.all(Radius.circular(10)),
-                      ),
-                      child: Icon(
-                        Icons.search,
-                        color: Colors.white,
+                      : 15, top: 20, bottom: 20),
+                  child: SizedBox(
+                    width: width <= 375
+                        ? 200
+                        : width <= 425
+                        ? 240:
+                    width <= 520
+                        ? 260 // You can specify the width for widths less than 425
+                        : width < 768
+                        ? 370 // You can specify the width for widths less than 768
+                        : width < 1024
+                        ? 400 // You can specify the width for widths less than 1024
+                        : width <= 1440
+                        ? 500
+                        : width > 1440 && width <= 2550
+                        ? 500
+                        : 800,
+                    child: TextField(
+                      onChanged: (value) {
+                        setState(() {
+                          searchQuery = value;
+                        });
+                      },
+                      decoration: InputDecoration(
+                        hintText: "Search",
+                        fillColor: primaryColor,
+                        filled: true,
+                        border: const OutlineInputBorder(
+                          borderSide: BorderSide.none,
+                          borderRadius: BorderRadius.all(Radius.circular(10)),
+                        ),
+                        suffixIcon: Container(
+                          padding: const EdgeInsets.all(defaultPadding * 0.75),
+                          margin: const EdgeInsets.symmetric(
+                              horizontal: defaultPadding / 2),
+                          decoration: const BoxDecoration(
+                            color: primaryColor,
+                            borderRadius: BorderRadius.all(Radius.circular(10)),
+                          ),
+                          child: const Icon(
+                            Icons.search,
+                            color: Colors.white,
+                          ),
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
+              ],
             ),
             SizedBox(height: 20,),
 

@@ -80,7 +80,7 @@ class _Order_ScreenState extends State<Order_Screen> {
         //   ),
         // ),
         body: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 100,vertical: 20),
+          padding: const EdgeInsets.symmetric(horizontal: 40,vertical: 20),
 
 
           child: Column(
@@ -394,7 +394,7 @@ class _Order_ScreenState extends State<Order_Screen> {
                           ],
                         ),
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 50),
+                          padding: const EdgeInsets.symmetric(horizontal: 30),
 
                           child: const Divider(color: Colors.grey, thickness: 2),
                         ),

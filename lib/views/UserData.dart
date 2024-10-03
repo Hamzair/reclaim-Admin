@@ -115,7 +115,7 @@ class _UserDataState extends State<UserData>
     final width = MediaQuery.of(context).size.width;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 100,vertical: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 40,vertical: 20),
 
       child: Column(
         children: [
@@ -374,7 +374,7 @@ class _UserDataState extends State<UserData>
                     ],
                   ),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal:40),
+                    padding: const EdgeInsets.symmetric(horizontal:30),
 
                     child: const Divider(
                       color: Colors.grey,

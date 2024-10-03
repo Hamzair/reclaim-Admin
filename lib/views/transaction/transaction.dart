@@ -161,9 +161,9 @@ class _Transaction1State extends State<Transaction1> {
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 10),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  SizedBox(width: 65),
+                  // SizedBox(width: 65),
                   Expanded(
                     child: Text(
                       'User Name',
@@ -248,9 +248,9 @@ class _Transaction1State extends State<Transaction1> {
                         return Column(
                           children: [
                             Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               children: [
-                                SizedBox(width: 10),
+                                // SizedBox(width: 10),
                                 Container(
                                   width: 60,
                                   height: 60,

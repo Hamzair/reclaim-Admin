@@ -211,7 +211,7 @@ class _BookListViewState extends State<BookListView> {
     final SidebarController sidebarController = Get.put(SidebarController());
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 100,vertical: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 40,vertical: 20),
       child: Column(
         // crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -523,7 +523,7 @@ class _BookListViewState extends State<BookListView> {
                               ),
                               Padding(
                                 padding:
-                                    const EdgeInsets.symmetric(horizontal: 50),
+                                    const EdgeInsets.symmetric(horizontal: 30),
                                 child: Divider(
                                   color: Colors.grey,
                                   thickness: 2,
