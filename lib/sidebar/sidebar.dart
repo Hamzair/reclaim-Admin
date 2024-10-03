@@ -1,4 +1,7 @@
+import 'package:Reclaim_admin_panel/views/adminWallet/wallet.dart';
 import 'package:Reclaim_admin_panel/views/support_chat/user_chats.dart';
+import 'package:Reclaim_admin_panel/views/transaction/transaction.dart';
+import 'package:Reclaim_admin_panel/views/withdrawals/withdrawals_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../views/UserData.dart';
@@ -42,11 +45,23 @@ class _HomeMainState extends State<HomeMain> {
                                 ? UserData()
                                 : sidebarController.selectedindex.value == 3
                                     ? OrderUserChats()
-                        : sidebarController.selectedindex.value == 4
-                        ? UserPending()
-                        : sidebarController.selectedindex.value == 5
-                        ? SupportUserChats()
-                                : UserPending()))
+                                    : sidebarController.selectedindex.value == 4
+                                        ? UserPending()
+                                        : sidebarController
+                                                    .selectedindex.value ==
+                                                5
+                                            ? SupportUserChats():sidebarController
+                                                    .selectedindex.value ==
+                                                6
+                                            ? Wallet()
+                                            : sidebarController
+                                                        .selectedindex.value ==
+                                                    7
+                                                ? Transaction1():sidebarController
+                                                        .selectedindex.value ==
+                                                    8
+                                                ? Withdrawal_Screen()
+                                                : UserPending()))
               ],
             ),
             Obx(

@@ -1,8 +1,9 @@
-import 'package:Creek_admin_web/constants.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
+
+import '../../const/constants.dart';
 
 class WithdrawalRequest extends StatelessWidget {
   final String userId;
@@ -16,7 +17,7 @@ class WithdrawalRequest extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: secondaryColor,
+        backgroundColor: primaryColor,
         title: Text('Requests Details'),
       ),
       body: Column(
@@ -29,37 +30,58 @@ class WithdrawalRequest extends StatelessWidget {
                 SizedBox(width: 65),
                 Expanded(
                   child: Text(
-                    'Withdraw Amount',
+                    'Amount',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w500,
-                      color: Colors.blue,
+                      color: primaryColor,
                     ),
                     textAlign: TextAlign.center,
                   ),
                 ),
                 Expanded(
-                  child: Text('Btc Address',
+                  child: Text('Account Name',
                       style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.blue),
+                        fontSize: 18,
+                        fontWeight: FontWeight.w500,
+                        color: primaryColor,
+                      ),
+                      textAlign: TextAlign.center),
+                ),
+                Expanded(
+                  child: Text('Account Number',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w500,
+                        color: primaryColor,
+                      ),
+                      textAlign: TextAlign.center),
+                ),
+                Expanded(
+                  child: Text('CVC',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w500,
+                        color: primaryColor,
+                      ),
                       textAlign: TextAlign.center),
                 ),
                 Expanded(
                   child: Text('Request Time',
                       style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.blue),
+                        fontSize: 18,
+                        fontWeight: FontWeight.w500,
+                        color: primaryColor,
+                      ),
                       textAlign: TextAlign.center),
                 ),
                 Expanded(
                   child: Text('Withdraw Status',
                       style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.blue),
+                        fontSize: 18,
+                        fontWeight: FontWeight.w500,
+                        color: primaryColor,
+                      ),
                       textAlign: TextAlign.center),
                 ),
               ],
@@ -97,11 +119,12 @@ class WithdrawalRequest extends StatelessWidget {
                   itemCount: requests.length,
                   itemBuilder: (context, index) {
                     var request = requests[index];
-                    var amount = request['amountBTC'];
-                    var btcAddress = request['addressBTC'];
+                    var amount = request['amount'];
+                    var accountName = request['accountName'];
+                    var accountNumber = request['accountNumber'];
+                    var cvc = request['cvc'];
                     var requestTime = request['requestTime'];
                     var status = request['withdrawStatus'];
-                    // var btcamount = request['withdrawbtcAmount'];
 
                     return Padding(
                       padding: const EdgeInsets.symmetric(
@@ -114,18 +137,50 @@ class WithdrawalRequest extends StatelessWidget {
                               SizedBox(width: 65),
                               Expanded(
                                 child: Text(
+                                  style: TextStyle(
+                                      color: secondaryColor,
+                                      fontWeight: FontWeight.w400,
+                                      fontSize: 15),
                                   amount.toString(),
                                   textAlign: TextAlign.center,
                                 ),
                               ),
                               Expanded(
                                 child: Text(
-                                  btcAddress,
+                                  style: TextStyle(
+                                      color: secondaryColor,
+                                      fontWeight: FontWeight.w400,
+                                      fontSize: 15),
+                                  accountName,
                                   textAlign: TextAlign.center,
                                 ),
                               ),
                               Expanded(
                                 child: Text(
+                                  style: TextStyle(
+                                      color: secondaryColor,
+                                      fontWeight: FontWeight.w400,
+                                      fontSize: 15),
+                                  accountNumber,
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                              Expanded(
+                                child: Text(
+                                  style: TextStyle(
+                                      color: secondaryColor,
+                                      fontWeight: FontWeight.w400,
+                                      fontSize: 15),
+                                  cvc,
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                              Expanded(
+                                child: Text(
+                                  style: TextStyle(
+                                      color: secondaryColor,
+                                      fontWeight: FontWeight.w400,
+                                      fontSize: 15),
                                   DateFormat('yyyy-MM-dd HH:mm').format(
                                     requestTime.toDate(),
                                   ),
@@ -138,7 +193,6 @@ class WithdrawalRequest extends StatelessWidget {
                                   requestId: request.id,
                                   initialStatus: status,
                                   withdrawamount: amount,
-                                  // withdrawbtcamount: btcamount,
                                 ),
                               ),
                             ],
@@ -166,7 +220,6 @@ class StatusDropdown extends StatefulWidget {
   final String requestId;
   final String initialStatus;
   final double withdrawamount;
-  // final double withdrawbtcamount;
 
   const StatusDropdown({
     Key? key,
@@ -174,7 +227,6 @@ class StatusDropdown extends StatefulWidget {
     required this.requestId,
     required this.initialStatus,
     required this.withdrawamount,
-    // required this.withdrawbtcamount,
   }) : super(key: key);
 
   @override
@@ -210,20 +262,18 @@ class _StatusDropdownState extends State<StatusDropdown> {
 
       if (_selectedStatus == 'Cancelled') {
         // Get the current withdrawal amount
-        // var withdrawAmountbtc = widget.withdrawbtcamount;
+
         var withdrawAmountusd = widget.withdrawamount;
 
         // Get the current wallet balance
         var wallet = await walletRef.get();
         var currentBalanceusd = wallet['balance'];
-        var currentBalancebtc = wallet['btcBalance'];
 
         // Update the wallet balance
         var newBalance = currentBalanceusd + withdrawAmountusd;
-        // var newBtcbalance = currentBalancebtc + withdrawAmountbtc;
+
         await walletRef.update({
           'balance': newBalance,
-          // 'btcBalance': newBtcbalance,
         });
         await withdrawalRequestRef.update({'withdrawStatus': newStatus});
       } else if (_selectedStatus == 'Accepted') {
@@ -263,14 +313,26 @@ class _StatusDropdownState extends State<StatusDropdown> {
     }
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 100),
+      padding: const EdgeInsets.symmetric(horizontal: 60),
       child: DropdownButton<String>(
+        dropdownColor: Colors.white,
+        iconSize: 20,
+        // iconDisabledColor: Colors.red,
+        iconEnabledColor: Colors.black,
+
+        // style: TextStyle(color: Colors.red),
         isExpanded: true,
         value: _selectedStatus,
         items: _statuses.map((String status) {
           return DropdownMenuItem<String>(
             value: status,
-            child: Text(status),
+            child: Text(
+              status,
+              style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.w400,
+                  fontSize: 15),
+            ),
           );
         }).toList(),
         onChanged: (String? newValue) async {

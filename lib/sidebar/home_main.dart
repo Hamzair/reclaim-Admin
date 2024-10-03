@@ -66,8 +66,10 @@ class _ExampleSidebarXState extends State<ExampleSidebarX> {
     // final setNameProvider=Provider.of<GetHeadingNurseName>(context,listen: false);
     return GetBuilder<SidebarController>(builder: (sidebarController) {
       return SidebarX(
+
         controller: sidebarController.controller,
         theme: SidebarXTheme(
+
           margin: const EdgeInsets.all(10),
           decoration: BoxDecoration(
             color: primaryColor,
@@ -283,6 +285,45 @@ class _ExampleSidebarXState extends State<ExampleSidebarX> {
                 );
               },
               label: 'Support Chat'),
+          SidebarXItem(
+              onTap: () {
+                sidebarController.selectedindex.value = 6;
+
+                // setNameProvider.setName('Profile');
+              },
+              iconBuilder: (selected, hovered) {
+                return Icon(
+                  Icons.home,
+                  color: Colors.transparent,
+                );
+              },
+              label: 'Admin Wallet'),
+          SidebarXItem(
+              onTap: () {
+                sidebarController.selectedindex.value = 7;
+
+                // setNameProvider.setName('Profile');
+              },
+              iconBuilder: (selected, hovered) {
+                return Icon(
+                  Icons.home,
+                  color: Colors.transparent,
+                );
+              },
+              label: 'Transactions'),
+          SidebarXItem(
+              onTap: () {
+                sidebarController.selectedindex.value = 8;
+
+                // setNameProvider.setName('Profile');
+              },
+              iconBuilder: (selected, hovered) {
+                return Icon(
+                  Icons.home,
+                  color: Colors.transparent,
+                );
+              },
+              label: 'Withdrawals'),
           SidebarXItem(
               onTap: () {
                 sidebarController.selectedindex.value = 0;

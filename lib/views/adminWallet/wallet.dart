@@ -1,8 +1,11 @@
-import 'package:Creek_admin_web/constants.dart';
+import 'package:Reclaim_admin_panel/views/adminWallet/wallet_details.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:get/get.dart';
 
-import 'transaction_detail.dart';
+import '../../const/constants.dart';
+import '../../controller/sidebarController.dart';
 
 final FirebaseFirestore fireStore = FirebaseFirestore.instance;
 
@@ -14,6 +17,8 @@ class Wallet extends StatefulWidget {
 }
 
 class _WalletState extends State<Wallet> {
+  final SidebarController sidebarController = Get.put(SidebarController());
+
   late Stream<QuerySnapshot> walletStream;
   String searchQuery = '';
 
@@ -26,155 +31,220 @@ class _WalletState extends State<Wallet> {
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+
     return Scaffold(
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 20),
-            child: TextField(
-              onChanged: (value) {
-                setState(() {
-                  searchQuery = value;
-                });
-              },
-              decoration: InputDecoration(
-                hintText: "Search",
-                fillColor: secondaryColor,
-                filled: true,
-                border: OutlineInputBorder(
-                  borderSide: BorderSide.none,
-                  borderRadius: const BorderRadius.all(Radius.circular(10)),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 20),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: Get.width < 768
+                  ? MainAxisAlignment.start
+                  : MainAxisAlignment.center,
+              children: [
+                SizedBox(
+                  width: 20,
                 ),
-                suffixIcon: Container(
-                  padding: EdgeInsets.all(defaultPadding * 0.75),
-                  margin: EdgeInsets.symmetric(horizontal: defaultPadding / 2),
-                  decoration: BoxDecoration(
-                    color: primaryColor,
-                    borderRadius: const BorderRadius.all(Radius.circular(10)),
+                Get.width < 768
+                    ? GestureDetector(
+                  onTap: () {
+                    sidebarController.showsidebar.value = true;
+                  },
+                  child: SvgPicture.asset(
+                    'assets/images/drawernavigation.svg',
+                    colorFilter:
+                    ColorFilter.mode(primaryColor, BlendMode.srcIn),
                   ),
-                  child: Icon(
-                    Icons.search,
-                    color: Colors.white,
+                )
+                    : SizedBox.shrink(),
+                Padding(
+                  padding:  EdgeInsets.only(      left: width <= 375
+                      ? 10
+                      : width <= 520
+                      ? 10 // You can specify the width for widths less than 425
+                      : width < 768
+                      ? 15 // You can specify the width for widths less than 768
+                      : width < 1024
+                      ? 15 // You can specify the width for widths less than 1024
+                      : width <= 1440
+                      ? 15
+                      : width > 1440 && width <= 2550
+                      ? 15
+                      : 15, top: 20, bottom: 20),
+                  child: SizedBox(
+                    width: width <= 375
+                        ? 200
+                        : width <= 425
+                        ? 240:
+                    width <= 520
+                        ? 260 // You can specify the width for widths less than 425
+                        : width < 768
+                        ? 370 // You can specify the width for widths less than 768
+                        : width < 1024
+                        ? 400 // You can specify the width for widths less than 1024
+                        : width <= 1440
+                        ? 500
+                        : width > 1440 && width <= 2550
+                        ? 500
+                        : 800,
+                    child: TextField(
+                      onChanged: (value) {
+                        setState(() {
+                          searchQuery = value;
+                        });
+                      },
+                      decoration: InputDecoration(
+                        hintText: "Search",
+                        fillColor: primaryColor,
+                        filled: true,
+                        border: const OutlineInputBorder(
+                          borderSide: BorderSide.none,
+                          borderRadius: BorderRadius.all(Radius.circular(10)),
+                        ),
+                        suffixIcon: Container(
+                          padding: const EdgeInsets.all(defaultPadding * 0.75),
+                          margin: const EdgeInsets.symmetric(
+                              horizontal: defaultPadding / 2),
+                          decoration: const BoxDecoration(
+                            color: primaryColor,
+                            borderRadius: BorderRadius.all(Radius.circular(10)),
+                          ),
+                          child: const Icon(
+                            Icons.search,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
                 ),
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 10),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: const [
-                SizedBox(width: 65),
-                Expanded(
-                    child: Text(
-                  'Role',
-                  style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.blue),
-                  textAlign: TextAlign.center,
-                )),
-                Expanded(
-                    child: Text('Balance',
-                        style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.blue),
-                        textAlign: TextAlign.center)),
-                Expanded(
-                    child: Text('Transaction History',
-                        style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.blue),
-                        textAlign: TextAlign.center)),
               ],
             ),
-          ),
-          Expanded(
-            child: StreamBuilder<QuerySnapshot>(
-              stream: walletStream,
-              builder: (context, snapshot) {
-                if (snapshot.hasError) {
-                  return Center(
-                    child: Text('Error: ${snapshot.error}'),
-                  );
-                }
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: const [
+                  SizedBox(width: 65),
+                  Expanded(
+                      child: Text(
+                    'Role',
+                    style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w500,
+                        color:primaryColor),
+                    textAlign: TextAlign.center,
+                  )),
+                  Expanded(
+                      child: Text('Balance',
+                          style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500,
+                              color: primaryColor),
+                          textAlign: TextAlign.center)),
+                  Expanded(
+                      child: Text('Transaction History',
+                          style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500,
+                              color:primaryColor),
+                          textAlign: TextAlign.center)),
+                ],
+              ),
+            ),
+            Expanded(
+              child: StreamBuilder<QuerySnapshot>(
+                stream: walletStream,
+                builder: (context, snapshot) {
+                  if (snapshot.hasError) {
+                    return Center(
+                      child: Text('Error: ${snapshot.error}'),
+                    );
+                  }
 
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(
-                    child: CircularProgressIndicator(),
-                  );
-                }
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  }
 
-                // Extract the list of documents from the snapshot
-                List<DocumentSnapshot> documents = snapshot.data!.docs;
+                  // Extract the list of documents from the snapshot
+                  List<DocumentSnapshot> documents = snapshot.data!.docs;
 
-                return ListView.builder(
-                  itemCount: documents.length,
-                  itemBuilder: (context, index) {
-                    var document = documents[index];
-                    var balance = document['btcBalance'];
-                    var documentId = document.id;
+                  return ListView.builder(
+                    itemCount: documents.length,
+                    itemBuilder: (context, index) {
+                      var document = documents[index];
+                      var balance = document['balance'];
+                      var documentId = document.id;
 
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8.0, vertical: 5),
-                      child: Column(
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              SizedBox(width: 65),
-                              Expanded(
-                                child: Text(
-                                  'Admin',
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                              Expanded(
-                                child: Text(
-                                  '\$${balance ?? 'N/A'}',
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                              Expanded(
-                                child: GestureDetector(
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => TransactionDetail(
-                                            walletId: documentId),
-                                      ),
-                                    );
-                                  },
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8.0, vertical: 5),
+                        child: Column(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                SizedBox(width: 65),
+                                Expanded(
                                   child: Text(
-                                    'View Details',
-                                    textAlign: TextAlign.center,
                                     style: TextStyle(
-                                      color: Colors.blue,
-                                      decoration: TextDecoration.underline,
+                                        color: secondaryColor,
+                                        fontWeight: FontWeight.w400,
+                                        fontSize: 15),
+                                    'Admin',
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                                Expanded(
+                                  child: Text(
+                                    style: TextStyle(
+                                        color: secondaryColor,
+                                        fontWeight: FontWeight.w400,
+                                        fontSize: 15),
+                                    '${balance ?? 'N/A'} Aed',
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                                Expanded(
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => WalletDetail(
+                                              walletId: documentId),
+                                        ),
+                                      );
+                                    },
+                                    child: Text(
+                                      'View Details',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        color: Colors.blue,
+                                        decoration: TextDecoration.underline,
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
-                            ],
-                          ),
-                          Divider(
-                            color: Colors.grey,
-                            thickness: 2,
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                );
-              },
+                              ],
+                            ),
+                            Divider(
+                              color: Colors.grey,
+                              thickness: 2,
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
