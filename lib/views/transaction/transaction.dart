@@ -38,7 +38,7 @@ class _Transaction1State extends State<Transaction1> {
             .collection('transaction');
 
         // Get all transactions in the subcollection
-        QuerySnapshot transactionsSnapshot = await transactionsRef.get();
+        QuerySnapshot transactionsSnapshot = await transactionsRef.where('type',isNotEqualTo: 'withdraw').get();
 
         // Iterate through each transaction document
         for (var transactionDoc in transactionsSnapshot.docs) {
