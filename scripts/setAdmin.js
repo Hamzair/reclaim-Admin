@@ -19,6 +19,7 @@ admin.initializeApp({
 
 // Admin emails array
 const adminEmails = [
+  "hamzairshad126@gmail.com",
   "hamzaansari9776@gmail.com"
 ];
 
