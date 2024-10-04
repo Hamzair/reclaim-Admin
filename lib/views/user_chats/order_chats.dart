@@ -24,10 +24,11 @@ class _OrderUserChatsState extends State<OrderUserChats> {
     final width = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      body: SafeArea(
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
         child: Column(
           children: [
-            SizedBox(height: 20,),
+            // SizedBox(height: 20,),
             Row(
               mainAxisAlignment: Get.width < 768
                   ? MainAxisAlignment.start
@@ -38,46 +39,49 @@ class _OrderUserChatsState extends State<OrderUserChats> {
                 ),
                 Get.width < 768
                     ? GestureDetector(
-                  onTap: () {
-                    sidebarController.showsidebar.value = true;
-                  },
-                  child: SvgPicture.asset(
-                    'assets/images/drawernavigation.svg',
-                    colorFilter:
-                    ColorFilter.mode(primaryColor, BlendMode.srcIn),
-                  ),
-                )
+                        onTap: () {
+                          sidebarController.showsidebar.value = true;
+                        },
+                        child: SvgPicture.asset(
+                          'assets/images/drawernavigation.svg',
+                          colorFilter:
+                              ColorFilter.mode(primaryColor, BlendMode.srcIn),
+                        ),
+                      )
                     : SizedBox.shrink(),
                 Padding(
-                  padding:  EdgeInsets.only(      left: width <= 375
-                      ? 10
-                      : width <= 520
-                      ? 10 // You can specify the width for widths less than 425
-                      : width < 768
-                      ? 15 // You can specify the width for widths less than 768
-                      : width < 1024
-                      ? 15 // You can specify the width for widths less than 1024
-                      : width <= 1440
-                      ? 15
-                      : width > 1440 && width <= 2550
-                      ? 15
-                      : 15, top: 20, bottom: 20),
+                  padding: EdgeInsets.only(
+                      left: width <= 375
+                          ? 10
+                          : width <= 520
+                              ? 10 // You can specify the width for widths less than 425
+                              : width < 768
+                                  ? 15 // You can specify the width for widths less than 768
+                                  : width < 1024
+                                      ? 15 // You can specify the width for widths less than 1024
+                                      : width <= 1440
+                                          ? 15
+                                          : width > 1440 && width <= 2550
+                                              ? 15
+                                              : 15,
+                      top: 20,
+                      bottom: 20),
                   child: SizedBox(
                     width: width <= 375
                         ? 200
                         : width <= 425
-                        ? 240:
-                    width <= 520
-                        ? 260 // You can specify the width for widths less than 425
-                        : width < 768
-                        ? 370 // You can specify the width for widths less than 768
-                        : width < 1024
-                        ? 400 // You can specify the width for widths less than 1024
-                        : width <= 1440
-                        ? 500
-                        : width > 1440 && width <= 2550
-                        ? 500
-                        : 800,
+                            ? 240
+                            : width <= 520
+                                ? 260 // You can specify the width for widths less than 425
+                                : width < 768
+                                    ? 370 // You can specify the width for widths less than 768
+                                    : width < 1024
+                                        ? 400 // You can specify the width for widths less than 1024
+                                        : width <= 1440
+                                            ? 500
+                                            : width > 1440 && width <= 2550
+                                                ? 500
+                                                : 800,
                     child: TextField(
                       onChanged: (value) {
                         setState(() {
@@ -86,6 +90,7 @@ class _OrderUserChatsState extends State<OrderUserChats> {
                       },
                       decoration: InputDecoration(
                         hintText: "Search",
+                        hintStyle: TextStyle(color: Colors.white),
                         fillColor: primaryColor,
                         filled: true,
                         border: const OutlineInputBorder(
@@ -111,25 +116,35 @@ class _OrderUserChatsState extends State<OrderUserChats> {
                 ),
               ],
             ),
-            SizedBox(height: 20,),
+            // SizedBox(height: 20,),
 
             Expanded(
               child: StreamBuilder<QuerySnapshot>(
-                stream: FirebaseFirestore.instance.collection('orders').snapshots(),
+                stream:
+                    FirebaseFirestore.instance.collection('orders').snapshots(),
                 builder: (context, snapshot) {
                   if (!snapshot.hasData) {
-                    return const Center(child: CircularProgressIndicator());
+                    return const Center(
+                        child: CircularProgressIndicator(
+                      color: primaryColor,
+                    ));
                   }
                   // Filter data based on searchQuery
                   dynamic data = snapshot.data!.docs.where((doc) {
                     final orderData = doc.data() as Map<String, dynamic>;
                     final orderId = orderData['orderId'].toString();
                     return searchQuery.isEmpty ||
-                        orderId.toLowerCase().contains(searchQuery.toLowerCase());
+                        orderId
+                            .toLowerCase()
+                            .contains(searchQuery.toLowerCase());
                   }).toList();
 
                   if (data.isEmpty) {
-                    return const Center(child: Text("No orders chat found",style: TextStyle(color: Colors.black),));
+                    return const Center(
+                        child: Text(
+                      "No orders chat found",
+                      style: TextStyle(color: Colors.black),
+                    ));
                   }
 
                   // dynamic data = snapshot.data!.docs;
@@ -138,15 +153,18 @@ class _OrderUserChatsState extends State<OrderUserChats> {
                     itemCount: data.length,
                     padding: EdgeInsets.symmetric(horizontal: 20),
                     itemBuilder: (context, index) {
-                      final orderData = data[index].data() as Map<String, dynamic>;
+                      final orderData =
+                          data[index].data() as Map<String, dynamic>;
                       final productId = orderData['productId'];
 
                       return Card(
-                        color: primaryColor,
+                          color: primaryColor,
                           child: ListTile(
-                            onTap: () {
-                              Get.to(OrderUserMessages(chatsData: orderData,));
-                            },
+                              onTap: () {
+                                Get.to(OrderUserMessages(
+                                  chatsData: orderData,
+                                ));
+                              },
                               title: FutureBuilder(
                                   future: FirebaseFirestore.instance
                                       .collection('productsListing')
@@ -159,15 +177,50 @@ class _OrderUserChatsState extends State<OrderUserChats> {
                                       );
                                     }
 
-                                    final productData = productSnapshot.data!.data()
-                                        as Map<String, dynamic>;
-                                    final productName = productData['productName'];
+                                    final productData = productSnapshot.data!
+                                        .data() as Map<String, dynamic>;
+                                    final productName =
+                                        productData['productName'];
+                                    // final productImage = productData['productImages'];
 
                                     return Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
-                                        Text("Product Name: $productName",style: TextStyle(color: Colors.white),),
-                                        Text("OrderId: ${orderData['orderId']}",style: TextStyle(color: Colors.white),),
+                                        Row(
+                                          children: [
+                                            Container(
+                                              width: 70,
+                                              height: 70,
+                                              decoration: BoxDecoration(
+                                                shape: BoxShape.circle,
+                                                image: DecorationImage(
+                                                  image: NetworkImage(
+                                                      productData['productImages']
+                                                              [0] ??
+                                                          ''),
+                                                  fit: BoxFit.contain,
+                                                ),
+                                              ),
+                                            ),
+                                            SizedBox(width: 5,),
+                                            Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  "Product Name: $productName",
+                                                  style: TextStyle(color: Colors.white),
+                                                ),
+                                                Text(
+                                                  "OrderId: ${orderData['orderId']}",
+                                                  style: TextStyle(color: Colors.white),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+
+
                                       ],
                                     );
                                   })));

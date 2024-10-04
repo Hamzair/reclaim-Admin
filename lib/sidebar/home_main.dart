@@ -7,7 +7,7 @@ import 'package:sidebarx/sidebarx.dart';
 
 import '../controller/sidebarController.dart';
 import '../const/constants.dart';
-import '../views/notification_screen.dart';
+import '../views/notification/notification_screen.dart';
 import '../Auth/Login_Page.dart';
 import '../widgets/custom_button.dart';
 

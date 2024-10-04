@@ -48,15 +48,17 @@ class _SupportUserMessagesState extends State<SupportUserMessages> {
   Widget build(BuildContext context) {
     return Scaffold(
         bottomNavigationBar: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 40,vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 250,vertical: 10),
           child: TextField(
             onSubmitted: (val) async {
               await sendMessage();
             },
             controller: messageController,
             decoration: InputDecoration(
-              hintText: "Search",
+              hintText: "Type your message",
               fillColor: primaryColor,
+              hintStyle: TextStyle(color: Colors.white),
+
               filled: true,
               border: OutlineInputBorder(
                 borderSide: BorderSide.none,
@@ -89,52 +91,55 @@ class _SupportUserMessagesState extends State<SupportUserMessages> {
             style: TextStyle(color: Colors.white),
           ),
         ),
-        body: StreamBuilder<QuerySnapshot>(
-            stream: messageSnap,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return Center(
-                  child: CircularProgressIndicator(),
-                );
-              } else if (snapshot.hasError || !snapshot.hasData) {
-                return Center(
-                  child: Text("Error while getting messages"),
-                );
-              } else if (snapshot.data!.docs.isEmpty) {
-                return Center(
-                  child: Text("No Messages"),
-                );
-              }
-              dynamic messagesData = snapshot.data!.docs;
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                scrollController.animateTo(
-                  scrollController.position.maxScrollExtent,
-                  duration: const Duration(milliseconds: 350),
-                  curve: Curves.easeOut,
-                );
-              });
-              return ListView.builder(
-                  controller: scrollController,
-                  shrinkWrap: true,
-                  padding: EdgeInsets.symmetric(vertical: 20),
-                  itemCount: messagesData.length,
-                  itemBuilder: (context, index) {
-                    final message =
-                        messagesData[index].data() as Map<String, dynamic>;
-                    final userId = message['userId'];
-                    final isAdmin =
-                        userId == FirebaseAuth.instance.currentUser!.uid;
-                    // Parse Firestore timestamp and format it
-                    final Timestamp timeStamp = message['timestamp'];
-                    final DateTime date = timeStamp.toDate();
-                    final formattedDate =
-                        DateFormat('dd/MMM/yy h:mma').format(date);
-                    return Align(
-                      alignment: isAdmin
-                          ? Alignment.centerRight
-                          : Alignment.centerLeft,
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
+        body: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 200),
+          child: StreamBuilder<QuerySnapshot>(
+              stream: messageSnap,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(
+                    child: CircularProgressIndicator(
+                      color: primaryColor,
+
+                    ),
+                  );
+                } else if (snapshot.hasError || !snapshot.hasData) {
+                  return Center(
+                    child: Text("Error while getting messages"),
+                  );
+                } else if (snapshot.data!.docs.isEmpty) {
+                  return Center(
+                    child: Text("No Messages"),
+                  );
+                }
+                dynamic messagesData = snapshot.data!.docs;
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  scrollController.animateTo(
+                    scrollController.position.maxScrollExtent,
+                    duration: const Duration(milliseconds: 350),
+                    curve: Curves.easeOut,
+                  );
+                });
+                return ListView.builder(
+                    controller: scrollController,
+                    shrinkWrap: true,
+                    padding: EdgeInsets.symmetric(vertical: 20),
+                    itemCount: messagesData.length,
+                    itemBuilder: (context, index) {
+                      final message =
+                          messagesData[index].data() as Map<String, dynamic>;
+                      final userId = message['userId'];
+                      final isAdmin =
+                          userId == FirebaseAuth.instance.currentUser!.uid;
+                      // Parse Firestore timestamp and format it
+                      final Timestamp timeStamp = message['timestamp'];
+                      final DateTime date = timeStamp.toDate();
+                      final formattedDate =
+                          DateFormat('dd/MMM/yy h:mma').format(date);
+                      return Align(
+                        alignment: isAdmin
+                            ? Alignment.centerRight
+                            : Alignment.centerLeft,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
@@ -199,10 +204,10 @@ class _SupportUserMessagesState extends State<SupportUserMessages> {
                             ),
                           ],
                         ),
-                      ),
-                    );
-                  });
-            }));
+                      );
+                    });
+              }),
+        ));
   }
 }
 

@@ -3,8 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 
-import '../const/constants.dart';
-import '../controller/sidebarController.dart';
+import '../../const/constants.dart';
+import '../../controller/sidebarController.dart';
 
 class UserPending extends StatefulWidget {
   UserPending({
@@ -119,7 +119,8 @@ class _UserPendingState extends State<UserPending> {
 
     return Scaffold(
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 100,vertical: 20),
+        padding: const EdgeInsets.symmetric(horizontal: 40,vertical: 20),
+
 
         child: Column(
           children: [
@@ -181,6 +182,8 @@ class _UserPendingState extends State<UserPending> {
                       },
                       decoration: InputDecoration(
                         hintText: "Search",
+                        hintStyle: TextStyle(color: Colors.white),
+
                         fillColor: primaryColor,
                         filled: true,
                         border: const OutlineInputBorder(
@@ -243,7 +246,10 @@ class _UserPendingState extends State<UserPending> {
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return Center(
-                      child: CircularProgressIndicator(),
+                      child: CircularProgressIndicator(
+                        color: primaryColor,
+
+                      ),
                     );
                   } else if (snapshot.hasError ||
                       !snapshot.hasData ||
@@ -273,89 +279,85 @@ class _UserPendingState extends State<UserPending> {
                           : null;
                       var userId = pendingUser[index].id;
 
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8.0, vertical: 5),
-                        child: Column(
-                          children: [
-                            Row(
-                              // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                // SizedBox(width: 65),
-                                Expanded(
-                                  child: Container(
-                                    height: 120,
-                                    width: 120,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      image: userImage != null
-                                          ? DecorationImage(
-                                              image: NetworkImage(userImage),
-                                              fit: BoxFit.cover,
-                                            )
-                                          : null,
-                                    ),
-                                    child: userImage == null
-                                        ? Icon(Icons.person, size: 120)
+                      return Column(
+                        children: [
+                          Row(
+                            // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              // SizedBox(width: 65),
+                              Expanded(
+                                child: Container(
+                                  height: 120,
+                                  width: 120,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    image: userImage != null
+                                        ? DecorationImage(
+                                            image: NetworkImage(userImage),
+                                            fit: BoxFit.cover,
+                                          )
                                         : null,
                                   ),
+                                  child: userImage == null
+                                      ? Icon(Icons.person, size: 120)
+                                      : null,
                                 ),
-                                Expanded(
-                                  child: Text(
-                                    style: TextStyle(
-                                        color: secondaryColor,
+                              ),
+                              Expanded(
+                                child: Text(
+                                  style: TextStyle(
+                                      color: secondaryColor,
+                                      fontWeight: FontWeight.w400,
+                                      fontSize: 15),
+                                  userName,
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                              Expanded(
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    SizedBox(width: 40),
+                                    // const SizedBox(width: 170),
+                                    Text(
+                                      pendingUser[index]['pendingApproval'] ??
+                                              false
+                                          ? 'Approved'
+                                          : 'Pending',
+                                      style: TextStyle(
                                         fontWeight: FontWeight.w400,
-                                        fontSize: 15),
-                                    userName,
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
-                                Expanded(
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      SizedBox(width: 40),
-                                      // const SizedBox(width: 170),
-                                      Text(
-                                        pendingUser[index]['pendingApproval'] ??
-                                                false
-                                            ? 'Approved'
-                                            : 'Pending',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.w400,
-                                          fontSize: 15,
-                                          color: pendingUser[index]
-                                                      ['pendingApproval'] ??
-                                                  false
-                                              ? Colors.green
-                                              : Colors.red,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      IconButton(
-                                        onPressed: () {
-                                          showBanConfirmationDialog1(
-                                            context,
-                                            userId,
-                                            pendingUser[index]
+                                        fontSize: 15,
+                                        color: pendingUser[index]
                                                     ['pendingApproval'] ??
-                                                false,
-                                          );
-                                        },
-                                        icon: const Icon(Icons.edit,
-                                            color: primaryColor),
-                                      )
-                                    ],
-                                  ),
+                                                false
+                                            ? Colors.green
+                                            : Colors.red,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    IconButton(
+                                      onPressed: () {
+                                        showBanConfirmationDialog1(
+                                          context,
+                                          userId,
+                                          pendingUser[index]
+                                                  ['pendingApproval'] ??
+                                              false,
+                                        );
+                                      },
+                                      icon: const Icon(Icons.edit,
+                                          color: primaryColor),
+                                    )
+                                  ],
                                 ),
-                              ],
-                            ),
-                            Divider(
-                              color: Colors.grey,
-                              thickness: 2,
-                            ),
-                          ],
-                        ),
+                              ),
+                            ],
+                          ),
+                          Divider(
+                            color: Colors.grey,
+                            thickness: 2,
+                          ),
+                        ],
                       );
                     },
                   );

@@ -2,8 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
-import '../const/constants.dart';
-import '../controller/sidebarController.dart';
+import '../../const/constants.dart';
+import '../../controller/sidebarController.dart';
 
 class ProductsListing extends StatefulWidget {
   const ProductsListing({super.key});
@@ -211,7 +211,7 @@ class _BookListViewState extends State<BookListView> {
     final SidebarController sidebarController = Get.put(SidebarController());
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 40,vertical: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
       child: Column(
         // crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -276,6 +276,7 @@ class _BookListViewState extends State<BookListView> {
                     },
                     decoration: InputDecoration(
                       hintText: "Search",
+                      hintStyle: TextStyle(color: Colors.white),
                       fillColor: primaryColor,
                       filled: true,
                       border: OutlineInputBorder(
@@ -383,7 +384,9 @@ class _BookListViewState extends State<BookListView> {
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return Center(
-                    child: CircularProgressIndicator(),
+                    child: CircularProgressIndicator(
+                      color: primaryColor,
+                    ),
                   );
                 } else if (snapshot.hasError) {
                   return Center(
@@ -431,106 +434,104 @@ class _BookListViewState extends State<BookListView> {
                       String uid = bookData['listingId'];
                       bool approval = bookData['approval'] ?? false;
 
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8.0, vertical: 5),
-                        child: GestureDetector(
-                          onTap: () {
-                            // showBookDetailDialog(context, bookData);
-                          },
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Container(
-                                      width: 70,
-                                      height: 70,
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        image: DecorationImage(
-                                          image: NetworkImage(bookData['productImages'][0] ?? ''),
-                                          fit: BoxFit.contain,
-                                        ),
+                      return GestureDetector(
+                        onTap: () {
+                          // showBookDetailDialog(context, bookData);
+                        },
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Container(
+                                    width: 70,
+                                    height: 70,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      image: DecorationImage(
+                                        image: NetworkImage(
+                                            bookData['productImages'][0] ??
+                                                ''),
+                                        fit: BoxFit.contain,
                                       ),
                                     ),
                                   ),
-                                  Expanded(
-                                      child: Text(
-                                          style: TextStyle(
-                                              color: secondaryColor,
-                                              fontWeight: FontWeight.w400,
-                                              fontSize: 15),
-                                          bookData['productName'] ?? 'N/A',
-                                          textAlign: TextAlign.center)),
-                                  Expanded(
-                                      child: Text(
-                                          style: TextStyle(
-                                              color: secondaryColor,
-                                              fontWeight: FontWeight.w400,
-                                              fontSize: 15),
-                                          bookData['brand'] ?? 'N/A',
-                                          textAlign: TextAlign.center)),
-                                  Expanded(
-                                      child: Text(
-                                          overflow: width <= 520
-                                              ? TextOverflow.ellipsis
-                                              : TextOverflow.visible,
-                                          maxLines: 1,
-                                          style: TextStyle(
-                                              color: secondaryColor,
-                                              fontWeight: FontWeight.w400,
-                                              fontSize: 15),
-                                          _formatTimestamp(timestamp),
-                                          textAlign: TextAlign.center)),
-                                  Expanded(
-                                      child: Text(
-                                          style: TextStyle(
-                                              color: secondaryColor,
-                                              fontWeight: FontWeight.w400,
-                                              fontSize: 15),
-                                          "\$${bookData['productPrice'] ?? 'N/A'}",
-                                          textAlign: TextAlign.center)),
-                                  // Expanded(
-                                  //   child: Row(
-                                  //     children: [
-                                  //       SizedBox(width: 50),
-                                  //       Text(
-                                  //         approval
-                                  //             ? 'Approved'
-                                  //             : 'Approval\npending',
-                                  //         style: TextStyle(
-                                  //             color: approval
-                                  //                 ? Colors.green
-                                  //                 : Colors.red),
-                                  //       ),
-                                  //       SizedBox(width: 5),
-                                  //       IconButton(
-                                  //         onPressed: () {
-                                  //           // showBanConfirmationDialog(
-                                  //           //     context, uid,
-                                  //
-                                  //           );
-                                  //         },
-                                  //         icon: Icon(Icons.edit,
-                                  //             color: Colors.white),
-                                  //       ),
-                                  //     ],
-                                  //   ),
-                                  // ),
-                                ],
-                              ),
-                              Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 30),
-                                child: Divider(
-                                  color: Colors.grey,
-                                  thickness: 2,
                                 ),
+                                Expanded(
+                                    child: Text(
+                                        style: TextStyle(
+                                            color: secondaryColor,
+                                            fontWeight: FontWeight.w400,
+                                            fontSize: 15),
+                                        bookData['productName'] ?? 'N/A',
+                                        textAlign: TextAlign.center)),
+                                Expanded(
+                                    child: Text(
+                                        style: TextStyle(
+                                            color: secondaryColor,
+                                            fontWeight: FontWeight.w400,
+                                            fontSize: 15),
+                                        bookData['brand'] ?? 'N/A',
+                                        textAlign: TextAlign.center)),
+                                Expanded(
+                                    child: Text(
+                                        overflow: width <= 520
+                                            ? TextOverflow.ellipsis
+                                            : TextOverflow.visible,
+                                        maxLines: 1,
+                                        style: TextStyle(
+                                            color: secondaryColor,
+                                            fontWeight: FontWeight.w400,
+                                            fontSize: 15),
+                                        _formatTimestamp(timestamp),
+                                        textAlign: TextAlign.center)),
+                                Expanded(
+                                    child: Text(
+                                        style: TextStyle(
+                                            color: secondaryColor,
+                                            fontWeight: FontWeight.w400,
+                                            fontSize: 15),
+                                        "\$${bookData['productPrice'] ?? 'N/A'}",
+                                        textAlign: TextAlign.center)),
+                                // Expanded(
+                                //   child: Row(
+                                //     children: [
+                                //       SizedBox(width: 50),
+                                //       Text(
+                                //         approval
+                                //             ? 'Approved'
+                                //             : 'Approval\npending',
+                                //         style: TextStyle(
+                                //             color: approval
+                                //                 ? Colors.green
+                                //                 : Colors.red),
+                                //       ),
+                                //       SizedBox(width: 5),
+                                //       IconButton(
+                                //         onPressed: () {
+                                //           // showBanConfirmationDialog(
+                                //           //     context, uid,
+                                //
+                                //           );
+                                //         },
+                                //         icon: Icon(Icons.edit,
+                                //             color: Colors.white),
+                                //       ),
+                                //     ],
+                                //   ),
+                                // ),
+                              ],
+                            ),
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 30),
+                              child: Divider(
+                                color: Colors.grey,
+                                thickness: 2,
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       );
                     },

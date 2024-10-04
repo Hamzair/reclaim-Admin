@@ -35,7 +35,8 @@ class _WalletState extends State<Wallet> {
 
     return Scaffold(
       body: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 20),
+        padding: const EdgeInsets.symmetric(horizontal: 40,vertical: 20),
+
         child: Column(
           children: [
             Row(
@@ -99,6 +100,8 @@ class _WalletState extends State<Wallet> {
                       },
                       decoration: InputDecoration(
                         hintText: "Search",
+                        hintStyle: TextStyle(color: Colors.white),
+
                         fillColor: primaryColor,
                         filled: true,
                         border: const OutlineInputBorder(
@@ -168,7 +171,10 @@ class _WalletState extends State<Wallet> {
 
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return Center(
-                      child: CircularProgressIndicator(),
+                      child: CircularProgressIndicator(
+                        color: primaryColor,
+
+                      ),
                     );
                   }
 
@@ -182,68 +188,63 @@ class _WalletState extends State<Wallet> {
                       var balance = document['balance'];
                       var documentId = document.id;
 
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8.0, vertical: 5),
-                        child: Column(
-                          children: [
-                            Row(
-                              // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                // SizedBox(width: 65),
-                                Expanded(
-                                  child: Text(
-                                    style: TextStyle(
-                                        color: secondaryColor,
-                                        fontWeight: FontWeight.w400,
-                                        fontSize: 15),
-                                    'Admin',
-                                    textAlign: TextAlign.center,
-                                  ),
+                      return Column(
+                        children: [
+                          Row(
+                            // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              // SizedBox(width: 65),
+                              Expanded(
+                                child: Text(
+                                  style: TextStyle(
+                                      color: secondaryColor,
+                                      fontWeight: FontWeight.w400,
+                                      fontSize: 15),
+                                  'Admin',
+                                  textAlign: TextAlign.center,
                                 ),
-                                Expanded(
-                                  child: Text(
-                                    style: TextStyle(
-                                        color: secondaryColor,
-                                        fontWeight: FontWeight.w400,
-                                        fontSize: 15),
-                                    '${balance ?? 'N/A'} Aed',
-                                    textAlign: TextAlign.center,
-                                  ),
+                              ),
+                              Expanded(
+                                child: Text(
+                                  style: TextStyle(
+                                      color: secondaryColor,
+                                      fontWeight: FontWeight.w400,
+                                      fontSize: 15),
+                                  '${balance ?? 'N/A'} Aed',
+                                  textAlign: TextAlign.center,
                                 ),
-                                Expanded(
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) => WalletDetail(
-                                              walletId: documentId),
-                                        ),
-                                      );
-                                    },
-                                    child: Text(
-                                      'View Details',
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        color: Colors.blue,
-                                        decoration: TextDecoration.underline,
+                              ),
+                              Expanded(
+                                child: GestureDetector(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => WalletDetail(
+                                            walletId: documentId),
                                       ),
+                                    );
+                                  },
+                                  child: Text(
+                                    'View Details',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      color: Colors.blue,
+                                      decoration: TextDecoration.underline,
                                     ),
                                   ),
                                 ),
-                              ],
-                            ),
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 50),
-                              child: Divider(
-                                color: Colors.grey,
-                                thickness: 2,
                               ),
+                            ],
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 30),
+                            child: Divider(
+                              color: Colors.grey,
+                              thickness: 2,
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       );
                     },
                   );

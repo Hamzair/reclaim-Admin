@@ -157,9 +157,13 @@ class WalletDetail extends StatelessWidget {
                               ),
                             ],
                           ),
-                          Divider(
-                            color: Colors.grey,
-                            thickness: 2,
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 30),
+
+                            child: Divider(
+                              color: Colors.grey,
+                              thickness: 2,
+                            ),
                           ),
                         ],
                       ),

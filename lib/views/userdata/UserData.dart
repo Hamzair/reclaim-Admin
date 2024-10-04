@@ -4,9 +4,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 
-import '../const/constants.dart';
-import '../controller/sidebarController.dart';
-import '../widgets/custom_button.dart';
+import '../../const/constants.dart';
+import '../../controller/sidebarController.dart';
+import '../../widgets/custom_button.dart';
 
 class UserData extends StatefulWidget {
   @override
@@ -181,6 +181,8 @@ class _UserDataState extends State<UserData>
                     decoration: InputDecoration(
                       hintText: "Search",
                       fillColor: primaryColor,
+                      hintStyle: TextStyle(color: Colors.white),
+
                       filled: true,
                       border: const OutlineInputBorder(
                         borderSide: BorderSide.none,
@@ -278,7 +280,10 @@ class _UserDataState extends State<UserData>
       stream: FirebaseFirestore.instance.collection('userDetails').snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
-          return const Center(child: CircularProgressIndicator());
+          return const Center(child: CircularProgressIndicator(
+            color: primaryColor,
+
+          ));
         }
 
         List<Map<String, dynamic>> userDetails = snapshot.data!.docs
@@ -316,16 +321,16 @@ class _UserDataState extends State<UserData>
               },
               child: Column(
                 children: [
-                  SizedBox(
-                    height: 10,
-                  ),
+                  // SizedBox(
+                  //   height: 10,
+                  // ),
                   Row(
                     // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       Expanded(
                         child: Container(
-                          width: 80,
-                          height: 80,
+                          width: 70,
+                          height: 70,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             color: userDetail['userImage'] != null
@@ -374,7 +379,7 @@ class _UserDataState extends State<UserData>
                     ],
                   ),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal:30),
+                    padding: const EdgeInsets.only(left: 30,right: 10),
 
                     child: const Divider(
                       color: Colors.grey,

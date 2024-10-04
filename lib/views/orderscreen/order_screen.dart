@@ -2,8 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
-import '../const/constants.dart';
-import '../controller/sidebarController.dart';
+import '../../const/constants.dart';
+import '../../controller/sidebarController.dart';
 
 class Order_Screen extends StatefulWidget {
   const Order_Screen({super.key});
@@ -143,6 +143,8 @@ class _Order_ScreenState extends State<Order_Screen> {
                         },
                         decoration: InputDecoration(
                           hintText: "Search",
+                          hintStyle: TextStyle(color: Colors.white),
+
                           fillColor: primaryColor,
                           filled: true,
                           border: const OutlineInputBorder(
@@ -262,7 +264,10 @@ class _Order_ScreenState extends State<Order_Screen> {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(
-            child: CircularProgressIndicator(),
+            child: CircularProgressIndicator(
+              color: primaryColor,
+
+            ),
           );
         } else if (snapshot.hasError) {
           return Text('Error: ${snapshot.error}');
@@ -283,7 +288,9 @@ class _Order_ScreenState extends State<Order_Screen> {
                 (context, AsyncSnapshot<List<Map<String, dynamic>>> snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(
-                  child: CircularProgressIndicator(),
+                  child: CircularProgressIndicator(
+                    color: primaryColor,
+                  ),
                 );
               } else if (snapshot.hasError) {
                 return Text('Error: ${snapshot.error}');
@@ -334,7 +341,7 @@ class _Order_ScreenState extends State<Order_Screen> {
                                   image: DecorationImage(
                                     image: NetworkImage(
                                         order['productImages'][0] ?? ''),
-                                    fit: BoxFit.cover,
+                                    fit: BoxFit.contain,
                                   ),
                                 ),
                               ),

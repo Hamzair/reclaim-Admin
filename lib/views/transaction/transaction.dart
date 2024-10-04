@@ -15,39 +15,34 @@ class Transaction1 extends StatefulWidget {
 class _Transaction1State extends State<Transaction1> {
   String searchQuery = '';
   List<Map<String, dynamic>> allTransactions = [];
+  List<Map<String, dynamic>> filteredTransactions = [];
   final SidebarController sidebarController = Get.put(SidebarController());
 
   RxBool loading = false.obs;
+
   Future<List<Map<String, dynamic>>> fetchAllTransactions() async {
-    // Reference to the Firestore instance
     FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-    // List to store all transactions
-
     try {
-      // Get all documents in the wallet collection
       loading.value = true;
       QuerySnapshot walletSnapshot = await firestore.collection('wallet').get();
 
-      // Iterate through each wallet document
       for (var walletDoc in walletSnapshot.docs) {
-        // Get the transactions subcollection for the current wallet document
         CollectionReference transactionsRef = firestore
             .collection('wallet')
             .doc(walletDoc.id)
             .collection('transaction');
 
-        // Get all transactions in the subcollection
-        QuerySnapshot transactionsSnapshot = await transactionsRef.where('type',isNotEqualTo: 'withdraw').get();
+        QuerySnapshot transactionsSnapshot =
+            await transactionsRef.where('type', isNotEqualTo: 'withdraw').get();
 
-        // Iterate through each transaction document
         for (var transactionDoc in transactionsSnapshot.docs) {
-          // Add the transaction data to the allTransactions list
           allTransactions.add(transactionDoc.data() as Map<String, dynamic>);
         }
       }
+      // Initially, all transactions are shown
+      filteredTransactions = List.from(allTransactions);
       loading.value = false;
-      print('bubiyubsyidfby$allTransactions');
     } catch (e) {
       print('Error fetching transactions: $e');
       loading.value = false;
@@ -56,9 +51,23 @@ class _Transaction1State extends State<Transaction1> {
     return allTransactions;
   }
 
+  void filterTransactions() {
+    setState(() {
+      if (searchQuery.isEmpty) {
+        filteredTransactions = List.from(allTransactions);
+      } else {
+        filteredTransactions = allTransactions.where((transaction) {
+          final userName = transaction['userName']?.toLowerCase() ?? '';
+          final productName = transaction['productName']?.toLowerCase() ?? '';
+          return userName.contains(searchQuery.toLowerCase()) ||
+              productName.contains(searchQuery.toLowerCase());
+        }).toList();
+      }
+    });
+  }
+
   @override
   void initState() {
-    // TODO: implement initState
     fetchAllTransactions();
     super.initState();
   }
@@ -69,7 +78,7 @@ class _Transaction1State extends State<Transaction1> {
 
     return Scaffold(
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 40.0, vertical: 25),
+        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
         child: Column(
           children: [
             Row(
@@ -77,9 +86,7 @@ class _Transaction1State extends State<Transaction1> {
                   ? MainAxisAlignment.start
                   : MainAxisAlignment.center,
               children: [
-                SizedBox(
-                  width: 20,
-                ),
+                SizedBox(width: 20),
                 Get.width < 768
                     ? GestureDetector(
                         onTap: () {
@@ -94,45 +101,44 @@ class _Transaction1State extends State<Transaction1> {
                     : SizedBox.shrink(),
                 Padding(
                   padding: EdgeInsets.only(
-                      left: width <= 375
-                          ? 10
-                          : width <= 520
-                              ? 10 // You can specify the width for widths less than 425
-                              : width < 768
-                                  ? 15 // You can specify the width for widths less than 768
-                                  : width < 1024
-                                      ? 15 // You can specify the width for widths less than 1024
-                                      : width <= 1440
-                                          ? 15
-                                          : width > 1440 && width <= 2550
-                                              ? 15
-                                              : 15,
-                      top: 20,
-                      bottom: 20),
+                    left: width <= 375
+                        ? 10
+                        : width <= 520
+                            ? 10
+                            : width < 768
+                                ? 15
+                                : width < 1024
+                                    ? 15
+                                    : width <= 1440
+                                        ? 15
+                                        : 15,
+                    top: 20,
+                    bottom: 20,
+                  ),
                   child: SizedBox(
                     width: width <= 375
                         ? 200
                         : width <= 425
                             ? 240
                             : width <= 520
-                                ? 260 // You can specify the width for widths less than 425
+                                ? 260
                                 : width < 768
-                                    ? 370 // You can specify the width for widths less than 768
+                                    ? 370
                                     : width < 1024
-                                        ? 400 // You can specify the width for widths less than 1024
+                                        ? 400
                                         : width <= 1440
                                             ? 500
-                                            : width > 1440 && width <= 2550
-                                                ? 500
-                                                : 800,
+                                            : 500,
                     child: TextField(
                       onChanged: (value) {
                         setState(() {
                           searchQuery = value;
+                          filterTransactions(); // Call this method to filter transactions
                         });
                       },
                       decoration: InputDecoration(
                         hintText: "Search",
+                        hintStyle: TextStyle(color: Colors.white),
                         fillColor: primaryColor,
                         filled: true,
                         border: const OutlineInputBorder(
@@ -159,11 +165,19 @@ class _Transaction1State extends State<Transaction1> {
               ],
             ),
             const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 10),
+              padding: EdgeInsets.symmetric(vertical: 10),
               child: Row(
-                // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  // SizedBox(width: 65),
+                  Expanded(
+                    child: Text(
+                      'Image',
+                      style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500,
+                          color: primaryColor),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
                   Expanded(
                     child: Text(
                       'User Name',
@@ -186,7 +200,7 @@ class _Transaction1State extends State<Transaction1> {
                   ),
                   Expanded(
                     child: Text(
-                      'Purchase Type',
+                      'Type',
                       style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w500,
@@ -196,7 +210,7 @@ class _Transaction1State extends State<Transaction1> {
                   ),
                   Expanded(
                     child: Text(
-                      'Purchase Price',
+                      'Price',
                       style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w500,
@@ -206,7 +220,7 @@ class _Transaction1State extends State<Transaction1> {
                   ),
                   Expanded(
                     child: Text(
-                      'Purchase Date',
+                      'Date',
                       style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w500,
@@ -228,105 +242,112 @@ class _Transaction1State extends State<Transaction1> {
               ),
             ),
             Expanded(
-                child: Obx(
-              () => loading.value
-                  ? Center(
-                      child: CircularProgressIndicator(
-                        color: Colors.black,
-                      ),
-                    )
-                  : ListView.builder(
-                      itemCount: allTransactions.length,
-                      itemBuilder: (context, index) {
-                        var transaction = allTransactions[index];
-                        var transactionTimestamp =
-                            transaction['date'] as Timestamp;
-                        var transactionDate = transactionTimestamp.toDate();
-                        var formattedDate =
-                            DateFormat('d MMMM yyyy \'at\' HH:mm:ss')
-                                .format(transactionDate);
-                        return Column(
-                          children: [
-                            Row(
-                              // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                // SizedBox(width: 10),
-                                Container(
-                                  width: 60,
-                                  height: 60,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: transaction['userImage'] != null
-                                        ? Colors.transparent
-                                        : Colors.red,
+              child: Obx(
+                () => loading.value
+                    ? Center(
+                        child: CircularProgressIndicator(
+                          color: primaryColor,
+                        ),
+                      )
+                    : ListView.builder(
+                        itemCount: filteredTransactions.length,
+                        itemBuilder: (context, index) {
+                          var transaction = filteredTransactions[index];
+                          var transactionTimestamp =
+                              transaction['date'] as Timestamp;
+                          var transactionDate = transactionTimestamp.toDate();
+                          var formattedDate =
+                              DateFormat('d MMMM yyyy \'at\' HH:mm:ss')
+                                  .format(transactionDate);
+
+                          return Column(
+                            children: [
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Container(
+                                      width: 70,
+                                      height: 70,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: transaction['userImage'] != null
+                                            ? Colors.transparent
+                                            : Colors.red,
+                                      ),
+                                      child: transaction['userImage'] != null
+                                          ? CircleAvatar(
+                                              backgroundImage: NetworkImage(
+                                                  transaction['userImage']),
+                                            )
+                                          : const Icon(Icons.person,
+                                              color: Colors.white),
+                                    ),
                                   ),
-                                  child: transaction['userImage'] != null
-                                      ? CircleAvatar(
-                                          backgroundImage: NetworkImage(
-                                              transaction['userImage']),
-                                        )
-                                      : const Icon(Icons.person,
-                                          color: Colors.white),
+                                  Expanded(
+                                      child: Text(
+                                          style: TextStyle(
+                                              color: secondaryColor,
+                                              fontWeight: FontWeight.w400,
+                                              fontSize: 15),
+                                          transaction['userName'] ?? '',
+                                          textAlign: TextAlign.center)),
+                                  Expanded(
+                                      child: Text(
+                                          style: TextStyle(
+                                              color: secondaryColor,
+                                              fontWeight: FontWeight.w400,
+                                              fontSize: 15),
+                                          transaction['productName'] ?? '',
+                                          textAlign: TextAlign.center)),
+                                  Expanded(
+                                      child: Text(
+                                          style: TextStyle(
+                                              color: secondaryColor,
+                                              fontWeight: FontWeight.w400,
+                                              fontSize: 15),
+                                          transaction['type'] ?? '',
+                                          textAlign: TextAlign.center)),
+                                  Expanded(
+                                      child: Text(
+                                          style: TextStyle(
+                                              color: secondaryColor,
+                                              fontWeight: FontWeight.w400,
+                                              fontSize: 15),
+                                          transaction['price'].toString() ?? '',
+                                          textAlign: TextAlign.center)),
+                                  Expanded(
+                                      child: Text(
+                                          style: TextStyle(
+                                              color: secondaryColor,
+                                              fontWeight: FontWeight.w400,
+                                              fontSize: 15),
+                                          formattedDate,
+                                          textAlign: TextAlign.center)),
+                                  Expanded(
+                                      child: Text(
+                                          style: TextStyle(
+                                              color: secondaryColor,
+                                              fontWeight: FontWeight.w400,
+                                              fontSize: 15),
+                                          transaction['sellerName'] ?? '',
+                                          textAlign: TextAlign.center)),
+                                ],
+                              ),
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 30),
+                                child: Divider(
+                                  // height: 20,
+                                  thickness: 2,
+                                  color: Colors.grey,
                                 ),
-                                Expanded(
-                                    child: Text(
-                                        style: TextStyle(
-                                            color: secondaryColor,
-                                            fontWeight: FontWeight.w400,
-                                            fontSize: 15),
-                                        transaction['userName'] ?? '',
-                                        textAlign: TextAlign.center)),
-                                Expanded(
-                                    child: Text(
-                                        style: TextStyle(
-                                            color: secondaryColor,
-                                            fontWeight: FontWeight.w400,
-                                            fontSize: 15),
-                                        transaction['productName'] ?? '',
-                                        textAlign: TextAlign.center)),
-                                Expanded(
-                                    child: Text(
-                                        style: TextStyle(
-                                            color: secondaryColor,
-                                            fontWeight: FontWeight.w400,
-                                            fontSize: 15),
-                                        transaction['type'] ?? '',
-                                        textAlign: TextAlign.center)),
-                                Expanded(
-                                    child: Text(
-                                        style: TextStyle(
-                                            color: secondaryColor,
-                                            fontWeight: FontWeight.w400,
-                                            fontSize: 15),
-                                        transaction['price'].toString() ?? '',
-                                        textAlign: TextAlign.center)),
-                                Expanded(
-                                    child: Text(
-                                        style: TextStyle(
-                                            color: secondaryColor,
-                                            fontWeight: FontWeight.w400,
-                                            fontSize: 15),
-                                        formattedDate,
-                                        textAlign: TextAlign.center)),
-                                Expanded(
-                                    child: Text(
-                                        style: TextStyle(
-                                            color: secondaryColor,
-                                            fontWeight: FontWeight.w400,
-                                            fontSize: 15),
-                                        transaction['sellerName'] ?? '',
-                                        textAlign: TextAlign.center)),
-                              ],
-                            ),
-                            const Divider(
-                              color: Colors.grey,
-                              thickness: 2,
-                            )
-                          ],
-                        );
-                      },
-                    ),
-            )),
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+              ),
+            ),
           ],
         ),
       ),
