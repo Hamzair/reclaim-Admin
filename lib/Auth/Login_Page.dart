@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../sidebar/sidebar.dart';
 import '../const/constants.dart';
 
 class LoginPage extends StatefulWidget {
@@ -23,8 +22,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   void initState() {
     super.initState();
-    emailController.text = "admin@reclaim.com";
-    passwordController.text = "reclaim123";
+    // Keep fields empty — admin must enter credentials manually.
   }
 
   void login() async {
@@ -80,7 +78,7 @@ class _LoginPageState extends State<LoginPage> {
         rootScaffoldMessengerKey.currentState?.showSnackBar(const SnackBar(
             content: Text("Login Successful"), backgroundColor: Colors.black));
 
-        Get.offAll(() => const HomeMain());
+        Get.offAllNamed('/home');
       } else {
         debugPrint("No matching admin credentials found in Firestore.");
         rootScaffoldMessengerKey.currentState?.showSnackBar(const SnackBar(

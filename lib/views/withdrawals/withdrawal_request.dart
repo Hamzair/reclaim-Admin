@@ -1,9 +1,25 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 
 import '../../const/constants.dart';
+
+String normalizeWithdrawStatus(dynamic raw) {
+  final value = (raw ?? 'pending').toString().trim().toLowerCase();
+  switch (value) {
+    case 'accepted':
+    case 'approved':
+    case 'completed':
+    case 'success':
+      return 'Accepted';
+    case 'cancelled':
+    case 'canceled':
+    case 'rejected':
+      return 'Cancelled';
+    default:
+      return 'Pending';
+  }
+}
 
 class WithdrawalRequest extends StatelessWidget {
   final String userId;
@@ -18,71 +34,57 @@ class WithdrawalRequest extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: primaryColor,
-        title: Text('Requests Details'),
+        title: const Text('Withdrawal Requests'),
       ),
       body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 10),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 10),
             child: Row(
-              // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: const [
-                // SizedBox(width: 65),
+              children: [
                 Expanded(
                   child: Text(
                     'Amount',
                     style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
                       color: primaryColor,
                     ),
                     textAlign: TextAlign.center,
                   ),
                 ),
                 Expanded(
-                  child: Text('Acc Name',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w500,
-                        color: primaryColor,
-                      ),
-                      textAlign: TextAlign.center),
+                  child: Text(
+                    'Net / VAT',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: primaryColor,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
                 ),
                 Expanded(
-                  child: Text('Acc No',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w500,
-                        color: primaryColor,
-                      ),
-                      textAlign: TextAlign.center),
+                  child: Text(
+                    'Request Time',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: primaryColor,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
                 ),
                 Expanded(
-                  child: Text('CVC',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w500,
-                        color: primaryColor,
-                      ),
-                      textAlign: TextAlign.center),
-                ),
-                Expanded(
-                  child: Text('Request Time',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w500,
-                        color: primaryColor,
-                      ),
-                      textAlign: TextAlign.center),
-                ),
-                Expanded(
-                  child: Text('Withdraw Status',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w500,
-                        color: primaryColor,
-                      ),
-                      textAlign: TextAlign.center),
+                  child: Text(
+                    'Status',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: primaryColor,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
                 ),
               ],
             ),
@@ -97,36 +99,54 @@ class WithdrawalRequest extends StatelessWidget {
               builder: (context, snapshot) {
                 if (snapshot.hasError) {
                   return Center(
-                    child: Text('Error: hama'),
+                    child: Text('Error: ${snapshot.error}'),
                   );
                 }
 
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(
-                    child: CircularProgressIndicator(
-                      color: primaryColor,
-                    ),
+                  return const Center(
+                    child: CircularProgressIndicator(color: primaryColor),
                   );
                 }
 
-                var requests = snapshot.data!.docs;
-
+                final requests = snapshot.data?.docs ?? [];
                 if (requests.isEmpty) {
-                  return Center(
-                    child: Text('No Requests found.'),
-                  );
+                  return const Center(child: Text('No requests found.'));
                 }
+
+                // Newest first when possible
+                final sorted = [...requests];
+                sorted.sort((a, b) {
+                  final aTime = a.data() is Map
+                      ? (a.data() as Map)['requestTime']
+                      : null;
+                  final bTime = b.data() is Map
+                      ? (b.data() as Map)['requestTime']
+                      : null;
+                  if (aTime is Timestamp && bTime is Timestamp) {
+                    return bTime.compareTo(aTime);
+                  }
+                  return 0;
+                });
 
                 return ListView.builder(
-                  itemCount: requests.length,
+                  itemCount: sorted.length,
                   itemBuilder: (context, index) {
-                    var request = requests[index];
-                    var amount = request['amount'];
-                    var accountName = request['accountName'];
-                    var accountNumber = request['accountNumber'];
-                    var cvc = request['cvc'];
-                    var requestTime = request['requestTime'];
-                    var status = request['withdrawStatus'];
+                    final request = sorted[index];
+                    final data = request.data() as Map<String, dynamic>? ?? {};
+                    final amount = (data['amount'] as num?)?.toDouble() ?? 0;
+                    final net =
+                        (data['netPayoutAmount'] as num?)?.toDouble();
+                    final vat = (data['vatAmount'] as num?)?.toDouble();
+                    final requestTime = data['requestTime'];
+                    final status =
+                        normalizeWithdrawStatus(data['withdrawStatus']);
+
+                    String timeLabel = 'N/A';
+                    if (requestTime is Timestamp) {
+                      timeLabel = DateFormat('yyyy-MM-dd HH:mm')
+                          .format(requestTime.toDate());
+                    }
 
                     return Padding(
                       padding: const EdgeInsets.symmetric(
@@ -134,57 +154,38 @@ class WithdrawalRequest extends StatelessWidget {
                       child: Column(
                         children: [
                           Row(
-                            // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
-                              // SizedBox(width: 65),
                               Expanded(
                                 child: Text(
-                                  style: TextStyle(
-                                      color: secondaryColor,
-                                      fontWeight: FontWeight.w400,
-                                      fontSize: 15),
-                                  amount.toString(),
+                                  '${amount.toStringAsFixed(2)} AED',
+                                  style: const TextStyle(
+                                    color: secondaryColor,
+                                    fontWeight: FontWeight.w400,
+                                    fontSize: 14,
+                                  ),
                                   textAlign: TextAlign.center,
                                 ),
                               ),
                               Expanded(
                                 child: Text(
-                                  style: TextStyle(
-                                      color: secondaryColor,
-                                      fontWeight: FontWeight.w400,
-                                      fontSize: 15),
-                                  accountName,
+                                  net != null
+                                      ? 'Net ${net.toStringAsFixed(2)}\nVAT ${(vat ?? 0).toStringAsFixed(2)}'
+                                      : '—',
+                                  style: const TextStyle(
+                                    color: secondaryColor,
+                                    fontWeight: FontWeight.w400,
+                                    fontSize: 13,
+                                  ),
                                   textAlign: TextAlign.center,
                                 ),
                               ),
                               Expanded(
                                 child: Text(
-                                  style: TextStyle(
-                                      color: secondaryColor,
-                                      fontWeight: FontWeight.w400,
-                                      fontSize: 15),
-                                  accountNumber,
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                              Expanded(
-                                child: Text(
-                                  style: TextStyle(
-                                      color: secondaryColor,
-                                      fontWeight: FontWeight.w400,
-                                      fontSize: 15),
-                                  cvc,
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                              Expanded(
-                                child: Text(
-                                  style: TextStyle(
-                                      color: secondaryColor,
-                                      fontWeight: FontWeight.w400,
-                                      fontSize: 15),
-                                  DateFormat('yyyy-MM-dd HH:mm').format(
-                                    requestTime.toDate(),
+                                  timeLabel,
+                                  style: const TextStyle(
+                                    color: secondaryColor,
+                                    fontWeight: FontWeight.w400,
+                                    fontSize: 14,
                                   ),
                                   textAlign: TextAlign.center,
                                 ),
@@ -194,15 +195,12 @@ class WithdrawalRequest extends StatelessWidget {
                                   userId: userId,
                                   requestId: request.id,
                                   initialStatus: status,
-                                  withdrawamount: amount,
+                                  withdrawAmount: amount,
                                 ),
                               ),
                             ],
                           ),
-                          Divider(
-                            color: Colors.grey,
-                            thickness: 2,
-                          ),
+                          const Divider(color: Colors.grey, thickness: 2),
                         ],
                       ),
                     );
@@ -221,14 +219,14 @@ class StatusDropdown extends StatefulWidget {
   final String userId;
   final String requestId;
   final String initialStatus;
-  final double withdrawamount;
+  final double withdrawAmount;
 
   const StatusDropdown({
     Key? key,
     required this.userId,
     required this.requestId,
     required this.initialStatus,
-    required this.withdrawamount,
+    required this.withdrawAmount,
   }) : super(key: key);
 
   @override
@@ -237,64 +235,90 @@ class StatusDropdown extends StatefulWidget {
 
 class _StatusDropdownState extends State<StatusDropdown> {
   late String _selectedStatus;
+  bool _updating = false;
 
-  final List<String> _statuses = ['Accepted', 'Cancelled', 'Pending'];
+  final List<String> _statuses = ['Pending', 'Accepted', 'Cancelled'];
 
   @override
   void initState() {
     super.initState();
-    _selectedStatus = _statuses.contains(widget.initialStatus)
-        ? widget.initialStatus
-        : 'Pending'; // Default to 'Pending' if initial status is invalid
+    _selectedStatus = normalizeWithdrawStatus(widget.initialStatus);
   }
 
   Future<void> _updateStatus(String newStatus) async {
+    if (_updating) return;
+    setState(() {
+      _updating = true;
+      _selectedStatus = newStatus;
+    });
+
     try {
-      setState(() {
-        _selectedStatus = newStatus;
-      });
-      var withdrawalRequestRef = FirebaseFirestore.instance
+      final withdrawalRequestRef = FirebaseFirestore.instance
           .collection('userWithdrawals')
           .doc(widget.userId)
           .collection('withdrawalsRequest')
           .doc(widget.requestId);
 
-      var walletRef =
+      final walletRef =
           FirebaseFirestore.instance.collection('wallet').doc(widget.userId);
 
-      if (_selectedStatus == 'Cancelled') {
-        // Get the current withdrawal amount
+      // Persist lowercase to match app writes, keep UI label capitalized.
+      final storedStatus = newStatus.toLowerCase();
 
-        var withdrawAmountusd = widget.withdrawamount;
-
-        // Get the current wallet balance
-        var wallet = await walletRef.get();
-        var currentBalanceusd = wallet['balance'];
-
-        // Update the wallet balance
-        var newBalance = currentBalanceusd + withdrawAmountusd;
-
-        await walletRef.update({
-          'balance': newBalance,
+      if (newStatus == 'Cancelled') {
+        await FirebaseFirestore.instance.runTransaction((tx) async {
+          final walletSnap = await tx.get(walletRef);
+          final current =
+              (walletSnap.data()?['balance'] as num?)?.toDouble() ?? 0;
+          tx.set(
+            walletRef,
+            {'balance': current + widget.withdrawAmount},
+            SetOptions(merge: true),
+          );
+          tx.set(
+            withdrawalRequestRef,
+            {
+              'withdrawStatus': storedStatus,
+              'updatedAt': FieldValue.serverTimestamp(),
+            },
+            SetOptions(merge: true),
+          );
         });
-        await withdrawalRequestRef.update({'withdrawStatus': newStatus});
-      } else if (_selectedStatus == 'Accepted') {
-        await withdrawalRequestRef.update({'withdrawStatus': newStatus});
+      } else {
+        await withdrawalRequestRef.set({
+          'withdrawStatus': storedStatus,
+          'updatedAt': FieldValue.serverTimestamp(),
+        }, SetOptions(merge: true));
       }
-      debugPrint('Status updated');
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Status updated to $newStatus')),
+        );
+      }
     } catch (e) {
-      debugPrint('Error: $e');
+      debugPrint('Error updating withdraw status: $e');
+      if (mounted) {
+        setState(() {
+          _selectedStatus = normalizeWithdrawStatus(widget.initialStatus);
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to update status: $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _updating = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     if (_selectedStatus == 'Accepted') {
-      return Center(
+      return const Center(
         child: Text(
           'Accepted',
           style: TextStyle(
-            fontSize: 16,
+            fontSize: 15,
             fontWeight: FontWeight.bold,
             color: Colors.green,
           ),
@@ -302,11 +326,11 @@ class _StatusDropdownState extends State<StatusDropdown> {
       );
     }
     if (_selectedStatus == 'Cancelled') {
-      return Center(
+      return const Center(
         child: Text(
           'Cancelled',
           style: TextStyle(
-            fontSize: 16,
+            fontSize: 15,
             fontWeight: FontWeight.bold,
             color: Colors.red,
           ),
@@ -314,15 +338,22 @@ class _StatusDropdownState extends State<StatusDropdown> {
       );
     }
 
+    if (_updating) {
+      return const Center(
+        child: SizedBox(
+          width: 22,
+          height: 22,
+          child: CircularProgressIndicator(strokeWidth: 2, color: primaryColor),
+        ),
+      );
+    }
+
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 60),
+      padding: const EdgeInsets.symmetric(horizontal: 12),
       child: DropdownButton<String>(
         dropdownColor: Colors.white,
         iconSize: 20,
-        // iconDisabledColor: Colors.red,
         iconEnabledColor: Colors.black,
-
-        // style: TextStyle(color: Colors.red),
         isExpanded: true,
         value: _selectedStatus,
         items: _statuses.map((String status) {
@@ -330,19 +361,20 @@ class _StatusDropdownState extends State<StatusDropdown> {
             value: status,
             child: Text(
               status,
-              style: TextStyle(
-                  color: Colors.black,
-                  fontWeight: FontWeight.w400,
-                  fontSize: 15),
+              style: const TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.w400,
+                fontSize: 14,
+              ),
             ),
           );
         }).toList(),
         onChanged: (String? newValue) async {
-          if (newValue != null) {
+          if (newValue != null && newValue != _selectedStatus) {
             await _updateStatus(newValue);
           }
         },
-        underline: SizedBox.shrink(),
+        underline: const SizedBox.shrink(),
       ),
     );
   }

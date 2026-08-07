@@ -1,13 +1,13 @@
 import 'package:reclaim_admin_panel/const/constants.dart';
 import 'package:reclaim_admin_panel/views/support_chat/user_messages.dart';
-import 'package:reclaim_admin_panel/views/user_chats/order_messages.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
 
 import '../../controller/sidebarController.dart';
+import '../../helper/firestore_paginator.dart';
+import '../../widgets/admin_loaders.dart';
 
 class SupportUserChats extends StatefulWidget {
   const SupportUserChats({super.key});
@@ -17,326 +17,222 @@ class SupportUserChats extends StatefulWidget {
 }
 
 class _SupportUserChatsState extends State<SupportUserChats> {
-  RxBool loading = false.obs;
-
-  TextEditingController searchController = TextEditingController();
   final SidebarController sidebarController = Get.put(SidebarController());
-
   String searchQuery = '';
+  late final FirestorePaginator _paginator;
+  final List<Map<String, dynamic>> _chats = [];
+  bool _loading = true;
+  bool _loadingMore = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _paginator = FirestorePaginator(
+      query: FirebaseFirestore.instance
+          .collection('supportChat')
+          .orderBy(FieldPath.documentId),
+      pageSize: 20,
+    );
+    _refresh();
+  }
+
+  Future<Map<String, dynamic>> _enrichChat(QueryDocumentSnapshot doc) async {
+    final data = doc.data() as Map<String, dynamic>? ?? {};
+    final userId = (data['userId'] ?? doc.id).toString();
+    String userName = 'Unknown';
+    String userImage = '';
+    try {
+      final userSnap = await FirebaseFirestore.instance
+          .collection('userDetails')
+          .doc(userId)
+          .get();
+      final userData = userSnap.data() ?? {};
+      userName = (userData['userName'] ?? 'Unknown').toString();
+      userImage = (userData['userImage'] ?? '').toString();
+    } catch (_) {}
+
+    return {
+      ...data,
+      'docId': doc.id,
+      'userId': userId,
+      'userName': userName,
+      'userImage': userImage,
+    };
+  }
+
+  Future<void> _refresh() async {
+    setState(() => _loading = true);
+    try {
+      final docs = await _paginator.refresh();
+      final mapped = <Map<String, dynamic>>[];
+      for (final doc in docs) {
+        mapped.add(await _enrichChat(doc));
+      }
+      if (!mounted) return;
+      setState(() {
+        _chats
+          ..clear()
+          ..addAll(mapped);
+        _loading = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _loadMore() async {
+    if (_loadingMore || !_paginator.hasMore || searchQuery.trim().isNotEmpty) {
+      return;
+    }
+    setState(() => _loadingMore = true);
+    try {
+      final docs = await _paginator.loadMore();
+      final mapped = <Map<String, dynamic>>[];
+      for (final doc in docs) {
+        mapped.add(await _enrichChat(doc));
+      }
+      if (!mounted) return;
+      setState(() {
+        _chats.addAll(mapped);
+        _loadingMore = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _loadingMore = false);
+    }
+  }
+
+  List<Map<String, dynamic>> get _filtered {
+    final q = searchQuery.toLowerCase().trim();
+    if (q.isEmpty) return _chats;
+    return _chats.where((c) {
+      final name = (c['userName'] ?? '').toString().toLowerCase();
+      final uid = (c['userId'] ?? '').toString().toLowerCase();
+      return name.contains(q) || uid.contains(q);
+    }).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
+    final rows = _filtered;
 
     return Scaffold(
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 40,vertical: 20),
-
+        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
         child: Column(
           children: [
-            // SizedBox(
-            //   height: 20,
-            // ),
             Row(
               mainAxisAlignment: Get.width < 768
                   ? MainAxisAlignment.start
                   : MainAxisAlignment.center,
               children: [
-                SizedBox(
-                  width: 20,
-                ),
-                Get.width < 768
-                    ? GestureDetector(
-                        onTap: () {
-                          sidebarController.showsidebar.value = true;
-                        },
-                        child: SvgPicture.asset(
-                          'assets/images/drawernavigation.svg',
-                          colorFilter:
-                              ColorFilter.mode(primaryColor, BlendMode.srcIn),
-                        ),
-                      )
-                    : SizedBox.shrink(),
+                const SizedBox(width: 20),
+                if (Get.width < 768)
+                  GestureDetector(
+                    onTap: () => sidebarController.showsidebar.value = true,
+                    child: SvgPicture.asset(
+                      'assets/images/drawernavigation.svg',
+                      colorFilter: const ColorFilter.mode(
+                          primaryColor, BlendMode.srcIn),
+                    ),
+                  ),
                 Padding(
-                  padding: EdgeInsets.only(
-                      left: width <= 375
-                          ? 10
-                          : width <= 520
-                              ? 10 // You can specify the width for widths less than 425
-                              : width < 768
-                                  ? 15 // You can specify the width for widths less than 768
-                                  : width < 1024
-                                      ? 15 // You can specify the width for widths less than 1024
-                                      : width <= 1440
-                                          ? 15
-                                          : width > 1440 && width <= 2550
-                                              ? 15
-                                              : 15,
-                      top: 20,
-                      bottom: 20),
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 20, horizontal: 15),
                   child: SizedBox(
-                    width: width <= 375
-                        ? 200
-                        : width <= 425
-                            ? 240
-                            : width <= 520
-                                ? 260 // You can specify the width for widths less than 425
-                                : width < 768
-                                    ? 370 // You can specify the width for widths less than 768
-                                    : width < 1024
-                                        ? 400 // You can specify the width for widths less than 1024
-                                        : width <= 1440
-                                            ? 500
-                                            : width > 1440 && width <= 2550
-                                                ? 500
-                                                : 800,
+                    width: width <= 520 ? 260 : width < 768 ? 370 : 500,
                     child: TextField(
-                      onChanged: (value) {
-                        setState(() {
-                          searchQuery = value;
-                        });
-                      },
+                      onChanged: (v) => setState(() => searchQuery = v),
                       decoration: InputDecoration(
-                        hintText: "Search",
-                        hintStyle: TextStyle(color: Colors.white),
-
+                        hintText: 'Search support chats',
+                        hintStyle: const TextStyle(color: Colors.white),
                         fillColor: primaryColor,
                         filled: true,
                         border: const OutlineInputBorder(
                           borderSide: BorderSide.none,
                           borderRadius: BorderRadius.all(Radius.circular(10)),
                         ),
-                        suffixIcon: Container(
-                          padding: const EdgeInsets.all(defaultPadding * 0.75),
-                          margin: const EdgeInsets.symmetric(
-                              horizontal: defaultPadding / 2),
-                          decoration: const BoxDecoration(
-                            color: primaryColor,
-                            borderRadius: BorderRadius.all(Radius.circular(10)),
-                          ),
-                          child: const Icon(
-                            Icons.search,
-                            color: Colors.white,
-                          ),
-                        ),
+                        suffixIcon:
+                            const Icon(Icons.search, color: Colors.white),
                       ),
                     ),
                   ),
                 ),
+                IconButton(
+                  onPressed: _loading ? null : _refresh,
+                  icon: const Icon(Icons.refresh, color: primaryColor),
+                ),
               ],
             ),
-
-            // Padding(
-            //   padding: EdgeInsets.only(
-            //       left: width <= 375
-            //           ? 10
-            //           : width <= 520
-            //           ? 10 // You can specify the width for widths less than 425
-            //           : width < 768
-            //           ? 15 // You can specify the width for widths less than 768
-            //           : width < 1024
-            //           ? 15 // You can specify the width for widths less than 1024
-            //           : width <= 1440
-            //           ? 15
-            //           : width > 1440 && width <= 2550
-            //           ? 15
-            //           : 15,
-            //       top: 20,
-            //       bottom: 20),
-            //   child: SizedBox(
-            //     width: width <= 375
-            //         ? 200
-            //         : width <= 425
-            //         ? 240
-            //         : width <= 520
-            //         ? 260 // You can specify the width for widths less than 425
-            //         : width < 768
-            //         ? 370 // You can specify the width for widths less than 768
-            //         : width < 1024
-            //         ? 400 // You can specify the width for widths less than 1024
-            //         : width <= 1440
-            //         ? 500
-            //         : width > 1440 && width <= 2550
-            //         ? 500
-            //         : 800,
-            //     child: TextField(
-            //       onChanged: (value) {
-            //         setState(() {
-            //           searchQuery = value;
-            //         });
-            //       },
-            //       decoration: InputDecoration(
-            //         hintText: "Search",
-            //         fillColor: primaryColor,
-            //         filled: true,
-            //         border: OutlineInputBorder(
-            //           borderSide: BorderSide.none,
-            //           borderRadius:
-            //           const BorderRadius.all(Radius.circular(10)),
-            //         ),
-            //         suffixIcon: Container(
-            //           padding: EdgeInsets.all(defaultPadding * 0.75),
-            //           margin: EdgeInsets.symmetric(
-            //               horizontal: defaultPadding / 2),
-            //           decoration: BoxDecoration(
-            //             color: primaryColor,
-            //             borderRadius:
-            //             const BorderRadius.all(Radius.circular(10)),
-            //           ),
-            //           child: Icon(
-            //             Icons.search,
-            //             color: Colors.white,
-            //           ),
-            //         ),
-            //       ),
-            //     ),
-            //   ),
-            // ),
-            // SizedBox(
-            //   height: 20,
-            // ),
-
             Expanded(
-              child: StreamBuilder<QuerySnapshot>(
-                stream: FirebaseFirestore.instance
-                    .collection('supportChat')
-                    .snapshots(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(
-                      child: CircularProgressIndicator(
-                        color: primaryColor,
+              child: _loading
+                  ? const AdminLoader(message: 'Loading support chats...')
+                  : rows.isEmpty
+                      ? const AdminEmptyState(message: 'No Chats Yet')
+                      : RefreshIndicator(
+                          color: primaryColor,
+                          onRefresh: _refresh,
+                          child: ListView.builder(
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                            itemCount: rows.length + 1,
+                            itemBuilder: (context, index) {
+                              if (index == rows.length) {
+                                return AdminLoadMoreBar(
+                                  hasMore: searchQuery.trim().isEmpty &&
+                                      _paginator.hasMore,
+                                  isLoadingMore: _loadingMore,
+                                  loadedCount: _chats.length,
+                                  onLoadMore: _loadMore,
+                                );
+                              }
 
-                      ),
-                    );
-                  } else if (snapshot.hasError || !snapshot.hasData) {
-                    return Center(
-                      child: Text("Error while getting messages"),
-                    );
-                  } else if (snapshot.data!.docs.isEmpty) {
-                    return Center(
-                      child: Text("No Chats Yet"),
-                    );
-                  }
+                              final chats = rows[index];
+                              final image =
+                                  (chats['userImage'] ?? '').toString();
 
-                  dynamic data = snapshot.data!.docs;
-
-                  return Obx(() => loading.value
-                      ? Center(
-                          child: CircularProgressIndicator(
-                            color: primaryColor,
-
+                              return Card(
+                                color: primaryColor,
+                                child: ListTile(
+                                  onTap: () {
+                                    Get.to(SupportUserMessages(
+                                      chatsData: chats,
+                                    ));
+                                  },
+                                  leading: CircleAvatar(
+                                    backgroundImage: image.isNotEmpty
+                                        ? NetworkImage(image)
+                                        : const AssetImage(
+                                                'assets/images/logo.png')
+                                            as ImageProvider,
+                                  ),
+                                  title: Text(
+                                    (chats['userName'] ?? 'Unknown').toString(),
+                                    style: const TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w600),
+                                  ),
+                                  subtitle: Text(
+                                    (chats['lastMessage'] ??
+                                            chats['message'] ??
+                                            'Open chat')
+                                        .toString(),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                        color: Colors.white70),
+                                  ),
+                                ),
+                              );
+                            },
                           ),
-                        )
-                      : ListView.builder(
-                          shrinkWrap: true,
-                          itemCount: data.length,
-                          padding: EdgeInsets.symmetric(horizontal: 20),
-                          itemBuilder: (context, index) {
-                            final chats =
-                                data[index].data() as Map<String, dynamic>;
-                            return StreamBuilder<DocumentSnapshot>(
-                                stream: FirebaseFirestore.instance
-                                    .collection('userDetails')
-                                    .doc(chats['userId'])
-                                    .snapshots(),
-                                builder: (context, userSnapshot) {
-                                  if (userSnapshot.connectionState ==
-                                      ConnectionState.waiting) {
-                                    return SizedBox.shrink();
-                                  } else if (userSnapshot.hasError ||
-                                      !userSnapshot.hasData) {
-                                    return SizedBox.shrink();
-                                  } else if (!userSnapshot.data!.exists) {
-                                    return SizedBox.shrink();
-                                  }
-                                  dynamic userData = userSnapshot.data!.data();
-                                  String userName = userData['userName']
-                                      .toString()
-                                      .toLowerCase();
-
-                                  // Filter by search query
-                                  if (!userName.contains(searchQuery)) {
-                                    return SizedBox.shrink();
-                                  }
-                                  return Card(
-                                      color: primaryColor,
-                                      child: ListTile(
-                                          onTap: () {
-                                            Get.to(SupportUserMessages(
-                                              chatsData: chats,
-                                            ));
-                                          },
-                                          title: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                "${userData['userName'].toString().capitalizeFirst}",
-                                                style: TextStyle(
-                                                    color: Colors.white),
-                                              ),
-                                              LastMessageText(
-                                                userId: chats['userId'],
-                                              )
-                                            ],
-                                          )));
-                                });
-                          },
-                        ));
-                },
-              ),
+                        ),
             ),
           ],
         ),
       ),
     );
-  }
-}
-
-class LastMessageText extends StatelessWidget {
-  final String userId;
-  const LastMessageText({super.key, required this.userId});
-
-  @override
-  Widget build(BuildContext context) {
-    return StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection('supportChat')
-            .doc(userId)
-            .collection('messages')
-            .orderBy('timestamp', descending: true)
-            .snapshots(),
-        builder: (context, lastmessagesnap) {
-          if (lastmessagesnap.connectionState == ConnectionState.waiting) {
-            return SizedBox.shrink();
-          } else if (lastmessagesnap.hasError || !lastmessagesnap.hasData) {
-            return SizedBox.shrink();
-          } else if (lastmessagesnap.data!.docs!.isEmpty) {
-            return Text(
-              "No Message Yet",
-              style: TextStyle(color: Colors.white),
-            );
-          }
-          dynamic lastMessage = lastmessagesnap.data!.docs.first;
-
-          final timestamp = lastMessage['timestamp'];
-          // Format the timestamp to display time as "hh:mm a"
-          final DateTime dateTime = timestamp.toDate();
-          final String formattedTime = DateFormat('hh:mm a').format(dateTime);
-
-          return Row(
-            children: [
-              Text(
-                "${lastMessage['message']}",
-                style: TextStyle(color: Colors.white, fontSize: 13),
-              ),
-              Spacer(),
-              Text(
-                "$formattedTime",
-                style: TextStyle(color: Colors.white, fontSize: 13),
-              ),
-            ],
-          );
-        });
   }
 }

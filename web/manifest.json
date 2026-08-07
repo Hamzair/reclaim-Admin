@@ -1,14 +1,19 @@
 {
-    "name": "Reclaim_admin_web",
-    "short_name": "Reclaim_admin_web",
+    "name": "Reclaim Admin",
+    "short_name": "Reclaim Admin",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#FFFFFF",
+    "theme_color": "#FFFFFF",
+    "description": "Reclaim Admin Panel",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
+        {
+            "src": "favicon.png",
+            "sizes": "500x500",
+            "type": "image/png"
+        },
         {
             "src": "icons/Icon-192.png",
             "sizes": "192x192",

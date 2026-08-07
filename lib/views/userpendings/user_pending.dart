@@ -5,26 +5,83 @@ import 'package:get/get.dart';
 
 import '../../const/constants.dart';
 import '../../controller/sidebarController.dart';
+import '../../helper/firestore_paginator.dart';
+import '../../widgets/admin_loaders.dart';
 
 class UserPending extends StatefulWidget {
-  UserPending({
-    Key? key,
-  }) : super(key: key);
+  UserPending({Key? key}) : super(key: key);
 
   @override
   State<UserPending> createState() => _UserPendingState();
 }
 
-String searchQuery = '';
-
 class _UserPendingState extends State<UserPending> {
+  final SidebarController sidebarController = Get.put(SidebarController());
+  late final FirestorePaginator _paginator;
+  final List<Map<String, dynamic>> _items = [];
+  String searchQuery = '';
+  bool _loading = true;
+  bool _loadingMore = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _paginator = FirestorePaginator(
+      query: FirebaseFirestore.instance
+          .collection('pendingUserUpdates')
+          .orderBy(FieldPath.documentId),
+      pageSize: 20,
+    );
+    _refresh();
+  }
+
+  Future<void> _refresh() async {
+    setState(() => _loading = true);
+    try {
+      final docs = await _paginator.refresh();
+      if (!mounted) return;
+      setState(() {
+        _items
+          ..clear()
+          ..addAll(docs.map((d) {
+            final data = d.data() as Map<String, dynamic>? ?? {};
+            return {...data, 'docId': d.id};
+          }));
+        _loading = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _loadMore() async {
+    if (_loadingMore || !_paginator.hasMore || searchQuery.trim().isNotEmpty) {
+      return;
+    }
+    setState(() => _loadingMore = true);
+    try {
+      final docs = await _paginator.loadMore();
+      if (!mounted) return;
+      setState(() {
+        _items.addAll(docs.map((d) {
+          final data = d.data() as Map<String, dynamic>? ?? {};
+          return {...data, 'docId': d.id};
+        }));
+        _loadingMore = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _loadingMore = false);
+    }
+  }
+
   Future<void> checkForProfileUpdate(String userId) async {
     try {
       await FirebaseFirestore.instance
           .collection('pendingUserUpdates')
           .doc(userId)
           .update({"pendingApproval": true});
-      // Get pending updates
       DocumentSnapshot pendingUpdates = await FirebaseFirestore.instance
           .collection('pendingUserUpdates')
           .doc(userId)
@@ -37,36 +94,27 @@ class _UserPendingState extends State<UserPending> {
           await FirebaseFirestore.instance
               .collection('userDetails')
               .doc(userId)
-              .update(
-            {
-              'userName': update['pendingUserName'],
-            },
-          );
+              .update({'userName': update['pendingUserName']});
           if (update.containsKey('pendingUserImage') &&
               update['pendingUserImage'] != '') {
             await FirebaseFirestore.instance
                 .collection('userDetails')
                 .doc(userId)
-                .update(
-              {
-                'userImage': update['pendingUserImage'],
-              },
-            );
+                .update({'userImage': update['pendingUserImage']});
           }
-
-          // Remove the pending updates after approval
           await FirebaseFirestore.instance
               .collection('pendingUserUpdates')
               .doc(userId)
               .delete();
+          setState(() {
+            _items.removeWhere((e) => e['docId'] == userId);
+          });
         }
       }
     } catch (e) {
       print('Error Approving Profile Update $e');
     }
   }
-
-  final SidebarController sidebarController = Get.put(SidebarController());
 
   void showBanConfirmationDialog1(
       BuildContext context, String userId, bool isCurrentlyVerified) {
@@ -82,19 +130,17 @@ class _UserPendingState extends State<UserPending> {
               : 'Are you sure you want to approve this User?'),
           actions: <Widget>[
             TextButton(
-              child: Text(
+              child: const Text(
                 'No',
                 style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w400,
                     fontSize: 15),
               ),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
+              onPressed: () => Navigator.of(context).pop(),
             ),
             TextButton(
-              child: Text(
+              child: const Text(
                 'Confirm',
                 style: TextStyle(
                     color: Colors.white,
@@ -102,9 +148,8 @@ class _UserPendingState extends State<UserPending> {
                     fontSize: 15),
               ),
               onPressed: () async {
-                print('update');
                 await checkForProfileUpdate(userId);
-                Navigator.of(context).pop();
+                if (context.mounted) Navigator.of(context).pop();
               },
             ),
           ],
@@ -113,9 +158,19 @@ class _UserPendingState extends State<UserPending> {
     );
   }
 
+  List<Map<String, dynamic>> get _filtered {
+    final q = searchQuery.toLowerCase().trim();
+    if (q.isEmpty) return _items;
+    return _items.where((u) {
+      final name = (u['pendingUserName'] ?? '').toString().toLowerCase();
+      return name.contains(q);
+    }).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
+    final rows = _filtered;
 
     return Scaffold(
       body: Padding(
@@ -127,9 +182,7 @@ class _UserPendingState extends State<UserPending> {
                   ? MainAxisAlignment.start
                   : MainAxisAlignment.center,
               children: [
-                SizedBox(
-                  width: 20,
-                ),
+                const SizedBox(width: 20),
                 Get.width < 768
                     ? GestureDetector(
                         onTap: () {
@@ -137,53 +190,22 @@ class _UserPendingState extends State<UserPending> {
                         },
                         child: SvgPicture.asset(
                           'assets/images/drawernavigation.svg',
-                          colorFilter:
-                              ColorFilter.mode(primaryColor, BlendMode.srcIn),
+                          colorFilter: const ColorFilter.mode(
+                              primaryColor, BlendMode.srcIn),
                         ),
                       )
-                    : SizedBox.shrink(),
+                    : const SizedBox.shrink(),
                 Padding(
-                  padding: EdgeInsets.only(
-                      left: width <= 375
-                          ? 10
-                          : width <= 520
-                              ? 10 // You can specify the width for widths less than 425
-                              : width < 768
-                                  ? 15 // You can specify the width for widths less than 768
-                                  : width < 1024
-                                      ? 15 // You can specify the width for widths less than 1024
-                                      : width <= 1440
-                                          ? 15
-                                          : width > 1440 && width <= 2550
-                                              ? 15
-                                              : 15,
-                      top: 20,
-                      bottom: 20),
+                  padding: const EdgeInsets.only(left: 15, top: 20, bottom: 20),
                   child: SizedBox(
-                    width: width <= 375
-                        ? 200
-                        : width <= 425
-                            ? 240
-                            : width <= 520
-                                ? 260 // You can specify the width for widths less than 425
-                                : width < 768
-                                    ? 370 // You can specify the width for widths less than 768
-                                    : width < 1024
-                                        ? 400 // You can specify the width for widths less than 1024
-                                        : width <= 1440
-                                            ? 500
-                                            : width > 1440 && width <= 2550
-                                                ? 500
-                                                : 800,
+                    width: width <= 520 ? 260 : width < 768 ? 370 : 500,
                     child: TextField(
                       onChanged: (value) {
-                        setState(() {
-                          searchQuery = value;
-                        });
+                        setState(() => searchQuery = value);
                       },
                       decoration: InputDecoration(
                         hintText: "Search",
-                        hintStyle: TextStyle(color: Colors.white),
+                        hintStyle: const TextStyle(color: Colors.white),
                         fillColor: primaryColor,
                         filled: true,
                         border: const OutlineInputBorder(
@@ -196,23 +218,23 @@ class _UserPendingState extends State<UserPending> {
                               horizontal: defaultPadding / 2),
                           decoration: const BoxDecoration(
                             color: primaryColor,
-                            borderRadius: BorderRadius.all(Radius.circular(10)),
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(10)),
                           ),
-                          child: const Icon(
-                            Icons.search,
-                            color: Colors.white,
-                          ),
+                          child: const Icon(Icons.search, color: Colors.white),
                         ),
                       ),
                     ),
                   ),
                 ),
+                IconButton(
+                  onPressed: _loading ? null : _refresh,
+                  icon: const Icon(Icons.refresh, color: primaryColor),
+                ),
               ],
             ),
-            Row(
-              // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: const [
-                // SizedBox(width: 65),
+            const Row(
+              children: [
                 Expanded(
                     child: Text(
                   'User Image',
@@ -239,131 +261,121 @@ class _UserPendingState extends State<UserPending> {
               ],
             ),
             Expanded(
-              child: StreamBuilder<QuerySnapshot>(
-                stream: FirebaseFirestore.instance
-                    .collection('pendingUserUpdates')
-                    .snapshots(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(
-                      child: CircularProgressIndicator(
-                        color: primaryColor,
-                      ),
-                    );
-                  } else if (snapshot.hasError ||
-                      !snapshot.hasData ||
-                      snapshot.data!.docs.isEmpty) {
-                    return Center(
-                      child: Text(
-                        'No Pending User found.',
-                        style: TextStyle(
-                            color: secondaryColor,
-                            fontWeight: FontWeight.w400,
-                            fontSize: 15),
-                      ),
-                    );
-                  }
+              child: _loading
+                  ? const AdminLoader(message: 'Loading pending users...')
+                  : rows.isEmpty
+                      ? const AdminEmptyState(message: 'No Pending User found.')
+                      : RefreshIndicator(
+                          color: primaryColor,
+                          onRefresh: _refresh,
+                          child: ListView.builder(
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            itemCount: rows.length + 1,
+                            itemBuilder: (context, index) {
+                              if (index == rows.length) {
+                                return AdminLoadMoreBar(
+                                  hasMore: searchQuery.trim().isEmpty &&
+                                      _paginator.hasMore,
+                                  isLoadingMore: _loadingMore,
+                                  loadedCount: _items.length,
+                                  onLoadMore: _loadMore,
+                                );
+                              }
 
-                  var pendingUser = snapshot.data!.docs;
+                              final userData = rows[index];
+                              final userName =
+                                  userData['pendingUserName'] ?? '';
+                              final userImage =
+                                  userData['pendingUserImage'];
+                              final userId =
+                                  (userData['docId'] ?? '').toString();
+                              final approved =
+                                  userData['pendingApproval'] ?? false;
 
-                  return ListView.builder(
-                    itemCount: pendingUser.length,
-                    itemBuilder: (context, index) {
-                      var userData =
-                          pendingUser[index].data() as Map<String, dynamic>;
-
-                      var userName = pendingUser[index]['pendingUserName'];
-                      var userImage = userData.containsKey('pendingUserImage')
-                          ? pendingUser[index]['pendingUserImage']
-                          : null;
-                      var userId = pendingUser[index].id;
-
-                      return Column(
-                        children: [
-                          Row(
-                            // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              // SizedBox(width: 65),
-                              Expanded(
-                                child: Container(
-                                  height: 120,
-                                  width: 120,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    image: (userImage != null &&
-                                            userImage.toString().isNotEmpty)
-                                        ? DecorationImage(
-                                            image: NetworkImage(userImage),
-                                            fit: BoxFit.cover,
-                                          )
-                                        : null,
-                                  ),
-                                  child: (userImage == null ||
-                                          userImage.toString().isEmpty)
-                                      ? Icon(Icons.person, size: 120)
-                                      : null,
-                                ),
-                              ),
-                              Expanded(
-                                child: Text(
-                                  style: TextStyle(
-                                      color: secondaryColor,
-                                      fontWeight: FontWeight.w400,
-                                      fontSize: 15),
-                                  userName,
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                              Expanded(
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    SizedBox(width: 40),
-                                    // const SizedBox(width: 170),
-                                    Text(
-                                      pendingUser[index]['pendingApproval'] ??
-                                              false
-                                          ? 'Approved'
-                                          : 'Pending',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.w400,
-                                        fontSize: 15,
-                                        color: pendingUser[index]
-                                                    ['pendingApproval'] ??
-                                                false
-                                            ? Colors.green
-                                            : Colors.red,
+                              return Column(
+                                children: [
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: Container(
+                                          height: 120,
+                                          width: 120,
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            image: (userImage != null &&
+                                                    userImage
+                                                        .toString()
+                                                        .isNotEmpty)
+                                                ? DecorationImage(
+                                                    image: NetworkImage(
+                                                        userImage.toString()),
+                                                    fit: BoxFit.cover,
+                                                  )
+                                                : null,
+                                          ),
+                                          child: (userImage == null ||
+                                                  userImage
+                                                      .toString()
+                                                      .isEmpty)
+                                              ? const Icon(Icons.person,
+                                                  size: 120)
+                                              : null,
+                                        ),
                                       ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    IconButton(
-                                      onPressed: () {
-                                        showBanConfirmationDialog1(
-                                          context,
-                                          userId,
-                                          pendingUser[index]
-                                                  ['pendingApproval'] ??
-                                              false,
-                                        );
-                                      },
-                                      icon: const Icon(Icons.edit,
-                                          color: primaryColor),
-                                    )
-                                  ],
-                                ),
-                              ),
-                            ],
+                                      Expanded(
+                                        child: Text(
+                                          style: const TextStyle(
+                                              color: secondaryColor,
+                                              fontWeight: FontWeight.w400,
+                                              fontSize: 15),
+                                          '$userName',
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ),
+                                      Expanded(
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            const SizedBox(width: 40),
+                                            Text(
+                                              approved
+                                                  ? 'Approved'
+                                                  : 'Pending',
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.w400,
+                                                fontSize: 15,
+                                                color: approved
+                                                    ? Colors.green
+                                                    : Colors.red,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 8),
+                                            IconButton(
+                                              onPressed: () {
+                                                showBanConfirmationDialog1(
+                                                  context,
+                                                  userId,
+                                                  approved == true,
+                                                );
+                                              },
+                                              icon: const Icon(Icons.edit,
+                                                  color: primaryColor),
+                                            )
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const Divider(
+                                    color: Colors.grey,
+                                    thickness: 2,
+                                  ),
+                                ],
+                              );
+                            },
                           ),
-                          Divider(
-                            color: Colors.grey,
-                            thickness: 2,
-                          ),
-                        ],
-                      );
-                    },
-                  );
-                },
-              ),
+                        ),
             ),
           ],
         ),

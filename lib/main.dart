@@ -4,7 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'Auth/Login_Page.dart';
+import 'Auth/Login_Page.dart'; // LoginPage + UserController
 import 'const/constants.dart';
 import 'firebase_options.dart';
 
@@ -14,11 +14,21 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
+  // Avoid GetX restoring a broken route stack after hot restart on web.
+  Get.reset();
+
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
+
+  Widget _initialScreen() {
+    if (FirebaseAuth.instance.currentUser == null) {
+      return const LoginPage();
+    }
+    return const HomeMain();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,17 +42,32 @@ class MyApp extends StatelessWidget {
             .apply(bodyColor: Colors.white),
         canvasColor: secondaryColor,
       ),
-      home: FirebaseAuth.instance.currentUser == null
-          ? const LoginPage()
-          : const HomeMain(),
-      initialBinding: BindingsBuilder(() {
-        Get.lazyPut(() => UserController());
-      }),
+      // Use ONLY named routes — mixing `home` + `getPages` causes
+      // "Unexpected null value" on hot restart (GetX route_middleware).
+      initialRoute: '/',
       getPages: [
-        GetPage(name: '/login', page: () => const LoginPage()),
-        GetPage(name: '/home', page: () => const HomeMain()),
+        GetPage(
+          name: '/',
+          page: () => _initialScreen(),
+        ),
+        GetPage(
+          name: '/login',
+          page: () => const LoginPage(),
+        ),
+        GetPage(
+          name: '/home',
+          page: () => const HomeMain(),
+        ),
       ],
-      // AdminChatPanel(),
+      unknownRoute: GetPage(
+        name: '/not-found',
+        page: () => const LoginPage(),
+      ),
+      initialBinding: BindingsBuilder(() {
+        if (!Get.isRegistered<UserController>()) {
+          Get.put(UserController());
+        }
+      }),
     );
   }
 }

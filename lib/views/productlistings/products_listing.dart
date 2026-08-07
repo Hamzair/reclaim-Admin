@@ -4,6 +4,9 @@ import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import '../../const/constants.dart';
 import '../../controller/sidebarController.dart';
+import '../../helper/firestore_paginator.dart';
+import '../../widgets/admin_loaders.dart';
+import '../../widgets/confirm_dialog.dart';
 
 class ProductsListing extends StatefulWidget {
   const ProductsListing({super.key});
@@ -12,539 +15,344 @@ class ProductsListing extends StatefulWidget {
   State<ProductsListing> createState() => _ProductsListingState();
 }
 
-String searchQuery = '';
+class _ProductsListingState extends State<ProductsListing> {
+  final SidebarController sidebarController = Get.put(SidebarController());
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-final FirebaseFirestore fireStore = FirebaseFirestore.instance;
-
-String _formatTimestamp(Timestamp? timestamp) {
-  if (timestamp != null) {
-    DateTime dateTime = timestamp.toDate();
-    return "${dateTime.day}/${dateTime.month}/${dateTime.year} ${dateTime.hour}:${dateTime.minute}";
-  } else {
-    return 'N/A';
-  }
-}
-
-// void showBanConfirmationDialog(
-//     BuildContext context, String uid, bool isCurrentlyVerified) {
-//   showDialog(
-//     context: context,
-//     builder: (BuildContext context) {
-//       return AlertDialog(
-//         title: Text(
-//             isCurrentlyVerified ? 'Approval Pending Book' : 'Approved Book'),
-//         content: Text(isCurrentlyVerified
-//             ? 'Do you want to Approval Pending this book?'
-//             : 'Are you sure you want to approve this book?'),
-//         actions: <Widget>[
-//           TextButton(
-//             child: Text('No'),
-//             onPressed: () {
-//               Navigator.of(context).pop();
-//             },
-//           ),
-//           TextButton(
-//             child: Text('Confirm'),
-//             onPressed: () async {
-//               await FirebaseFirestore.instance
-//                   .collection('booksListing')
-//                   .doc(uid)
-//                   .update({'approval': !isCurrentlyVerified});
-//               Navigator.of(context).pop();
-//             },
-//           ),
-//         ],
-//       );
-//     },
-//   );
-// }
-
-// void showBookDetailDialog(BuildContext context, Map<String, dynamic> bookData) {
-//   showDialog(
-//     context: context,
-//     builder: (BuildContext context) {
-//       return AlertDialog(
-//         backgroundColor: secondaryColor,
-//         title: Text(bookData['bookName'] ?? 'No Title'),
-//         content: SingleChildScrollView(
-//           child: Column(
-//             crossAxisAlignment: CrossAxisAlignment.start,
-//             mainAxisSize: MainAxisSize.min,
-//             children: [
-//               Container(
-//                 height: 200,
-//                 decoration: BoxDecoration(
-//                   image: DecorationImage(
-//                     image: NetworkImage(bookData['bookImage'] ?? ''),
-//                     fit: BoxFit.cover,
-//                   ),
-//                 ),
-//               ),
-//               SizedBox(height: 20),
-//               Row(
-//                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//                 children: [
-//                   Text('Author:', style: TextStyle(fontWeight: FontWeight.bold,color: primaryColor)),
-//                   Text('${bookData['bookAuthor'] ?? 'N/A'}'),
-//                 ],
-//               ),
-//               Row(
-//                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//                 children: [
-//                   Text('Subtitle:', style: TextStyle(fontWeight: FontWeight.bold,color: primaryColor)),
-//                   Text('${bookData['bookSubtitle'] ?? 'N/A'}'),
-//                 ],
-//               ),
-//               Row(
-//                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//                 children: [
-//                   Text('Condition:', style: TextStyle(fontWeight: FontWeight.bold,color: primaryColor)),
-//                   Text('${bookData['bookCondition'] ?? 'N/A'}'),
-//                 ],
-//               ),
-//               Row(
-//                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//                 children: [
-//                   Text('Price:', style: TextStyle(fontWeight: FontWeight.bold,color: primaryColor)),
-//                   Text('\$${bookData['bookPrice'] ?? 'N/A'}'),
-//                 ],
-//               ),
-//               Row(
-//                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//                 children: [
-//                   Text('Posted on:', style: TextStyle(fontWeight: FontWeight.bold,color: primaryColor)),
-//                   Text('${_formatTimestamp(bookData['bookPosted'])}'),
-//                 ],
-//               ),
-//               SizedBox(height: 20),
-//               Text('Description:', style: TextStyle(fontWeight: FontWeight.bold,color: primaryColor)),
-//               SizedBox(
-//                   width: 500,
-//                   child: Text(
-//                       // maxLines: 5,
-//                       bookData['bookDescription'] ?? 'No Description')),
-//             ],
-//           ),
-//         ),
-//         actions: [
-//           TextButton(
-//             child: Text('Close', style: TextStyle(fontWeight: FontWeight.bold,color: Colors.red)),
-//             onPressed: () {
-//               Navigator.of(context).pop();
-//             },
-//           ),
-//         ],
-//       );
-//     },
-//   );
-// }
-
-Future<List<Map<String, dynamic>>> fetchUserBookListing() async {
-  try {
-    List<Map<String, dynamic>> listings = [];
-    QuerySnapshot listingsData =
-        await fireStore.collection('productsListing').get();
-    if (listingsData.docs.isNotEmpty) {
-      for (var book in listingsData.docs) {
-        dynamic bookData = book.data();
-        // var myBook = {
-        //   'bookImage': bookData['bookImage'],
-        //   'bookName': bookData['bookName'],
-        //   'bookSubtitle': bookData['bookSubtitle'],
-        //   'bookAuthor': bookData['bookAuthor'],
-        //   'bookCondition': bookData['bookCondition'],
-        //   'bookPrice': bookData['bookPrice'],
-        //   'bookPosted': bookData['bookPosted'],
-        //   'sellerId': bookData['sellerId'],
-        //   'bookDescription': bookData['bookDescription'],
-        //   'approval': bookData['approval'],
-        //   'listingId': book.id,
-        // };
-        listings.add(bookData);
-      }
-    } else {
-      print("No user listings found");
-    }
-    return listings;
-  } catch (e) {
-    print("Error fetching user listings $e");
-    return [];
-  }
-}
-
-class _ProductsListingState extends State<ProductsListing>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
+  late final FirestorePaginator _paginator;
+  final List<Map<String, dynamic>> _items = [];
+  String searchQuery = '';
+  bool _initialLoading = true;
+  bool _loadingMore = false;
+  bool _isDeleting = false;
+  String? _error;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _paginator = FirestorePaginator(
+      query: _db
+          .collection('productsListing')
+          .orderBy(FieldPath.documentId),
+      pageSize: 20,
+    );
+    _refresh();
   }
 
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
+  Future<void> _refresh() async {
+    setState(() {
+      _initialLoading = true;
+      _error = null;
+    });
+    try {
+      final docs = await _paginator.refresh();
+      if (!mounted) return;
+      setState(() {
+        _items
+          ..clear()
+          ..addAll(docs.map(_mapDoc));
+        _initialLoading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _initialLoading = false;
+        _error = e.toString();
+      });
+    }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return BookListView(approvalStatus: true);
+  Future<void> _loadMore() async {
+    if (_loadingMore ||
+        !_paginator.hasMore ||
+        searchQuery.trim().isNotEmpty) {
+      return;
+    }
+    setState(() => _loadingMore = true);
+    try {
+      final docs = await _paginator.loadMore();
+      if (!mounted) return;
+      setState(() {
+        _items.addAll(docs.map(_mapDoc));
+        _loadingMore = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _loadingMore = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to load more: $e')),
+      );
+    }
   }
-}
 
-class BookListView extends StatefulWidget {
-  final bool approvalStatus;
+  Map<String, dynamic> _mapDoc(QueryDocumentSnapshot doc) {
+    final data = doc.data() as Map<String, dynamic>? ?? {};
+    return {
+      ...data,
+      'listingId': doc.id,
+    };
+  }
 
-  const BookListView({required this.approvalStatus});
+  List<Map<String, dynamic>> get _filtered {
+    final q = searchQuery.trim().toLowerCase();
+    if (q.isEmpty) return _items;
+    return _items.where((item) {
+      final name = (item['productName'] ?? '').toString().toLowerCase();
+      final brand = (item['brand'] ?? '').toString().toLowerCase();
+      return name.contains(q) || brand.contains(q);
+    }).toList();
+  }
 
-  @override
-  _BookListViewState createState() => _BookListViewState();
-}
+  String _formatTimestamp(dynamic timestamp) {
+    if (timestamp is Timestamp) {
+      final d = timestamp.toDate();
+      return "${d.day}/${d.month}/${d.year} ${d.hour}:${d.minute}";
+    }
+    return 'N/A';
+  }
 
-class _BookListViewState extends State<BookListView> {
+  Future<void> _deleteListing(String listingId, String productName) async {
+    final ok = await showAdminConfirmDialog(
+      context: context,
+      title: 'Delete listing?',
+      message:
+          '“$productName” will be removed from Products Listing and from the app home feed.',
+      confirmText: 'Delete',
+    );
+    if (!ok) return;
+
+    setState(() => _isDeleting = true);
+    try {
+      await _db.collection('productsListing').doc(listingId).delete();
+      if (!mounted) return;
+      setState(() {
+        _items.removeWhere((e) => e['listingId'] == listingId);
+        _isDeleting = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Listing deleted')),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _isDeleting = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to delete: $e')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
-
-    final SidebarController sidebarController = Get.put(SidebarController());
+    final rows = _filtered;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
       child: Column(
-        // crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             mainAxisAlignment: Get.width < 768
                 ? MainAxisAlignment.start
                 : MainAxisAlignment.center,
             children: [
-              SizedBox(
-                width: 20,
-              ),
-              Get.width < 768
-                  ? GestureDetector(
-                      onTap: () {
-                        sidebarController.showsidebar.value = true;
-                      },
-                      child: SvgPicture.asset(
-                        'assets/images/drawernavigation.svg',
-                        colorFilter:
-                            ColorFilter.mode(primaryColor, BlendMode.srcIn),
-                      ),
-                    )
-                  : SizedBox.shrink(),
+              const SizedBox(width: 20),
+              if (Get.width < 768)
+                GestureDetector(
+                  onTap: () => sidebarController.showsidebar.value = true,
+                  child: SvgPicture.asset(
+                    'assets/images/drawernavigation.svg',
+                    colorFilter:
+                        const ColorFilter.mode(primaryColor, BlendMode.srcIn),
+                  ),
+                ),
               Padding(
-                padding: EdgeInsets.only(
-                    left: width <= 375
-                        ? 10
-                        : width <= 520
-                            ? 10 // You can specify the width for widths less than 425
-                            : width < 768
-                                ? 15 // You can specify the width for widths less than 768
-                                : width < 1024
-                                    ? 15 // You can specify the width for widths less than 1024
-                                    : width <= 1440
-                                        ? 15
-                                        : width > 1440 && width <= 2550
-                                            ? 15
-                                            : 15,
-                    top: 20,
-                    bottom: 20),
+                padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 15),
                 child: SizedBox(
-                  width: width <= 375
-                      ? 200
-                      : width <= 425
-                          ? 240
-                          : width <= 520
-                              ? 260 // You can specify the width for widths less than 425
-                              : width < 768
-                                  ? 370 // You can specify the width for widths less than 768
-                                  : width < 1024
-                                      ? 400 // You can specify the width for widths less than 1024
-                                      : width <= 1440
-                                          ? 500
-                                          : width > 1440 && width <= 2550
-                                              ? 500
-                                              : 800,
+                  width: width <= 520 ? 260 : width < 768 ? 370 : 500,
                   child: TextField(
-                    onChanged: (value) {
-                      setState(() {
-                        searchQuery = value;
-                      });
-                    },
+                    onChanged: (v) => setState(() => searchQuery = v),
                     decoration: InputDecoration(
-                      hintText: "Search",
-                      hintStyle: TextStyle(color: Colors.white),
+                      hintText: 'Search products',
+                      hintStyle: const TextStyle(color: Colors.white),
                       fillColor: primaryColor,
                       filled: true,
-                      border: OutlineInputBorder(
+                      border: const OutlineInputBorder(
                         borderSide: BorderSide.none,
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(10)),
+                        borderRadius: BorderRadius.all(Radius.circular(10)),
                       ),
-                      suffixIcon: Container(
-                        padding: EdgeInsets.all(defaultPadding * 0.75),
-                        margin: EdgeInsets.symmetric(
-                            horizontal: defaultPadding / 2),
-                        decoration: BoxDecoration(
-                          color: primaryColor,
-                          borderRadius:
-                              const BorderRadius.all(Radius.circular(10)),
-                        ),
-                        child: Icon(
-                          Icons.search,
-                          color: Colors.white,
-                        ),
-                      ),
+                      suffixIcon: const Icon(Icons.search, color: Colors.white),
                     ),
                   ),
                 ),
               ),
+              IconButton(
+                tooltip: 'Refresh',
+                onPressed: _initialLoading ? null : _refresh,
+                icon: const Icon(Icons.refresh, color: primaryColor),
+              ),
             ],
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 10),
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 10),
             child: Row(
               children: [
-                Expanded(
-                  child: Text(
-                    overflow: width <= 520
-                        ? TextOverflow.ellipsis
-                        : TextOverflow.visible,
-                    maxLines: width <= 520 ? 1 : 2,
-                    'Image',
-                    style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w500,
-                        color: primaryColor),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-                Expanded(
-                  child: Text(
-                    overflow: width <= 520
-                        ? TextOverflow.ellipsis
-                        : TextOverflow.visible,
-                    maxLines: width <= 520 ? 1 : 2,
-                    'Title',
-                    style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w500,
-                        color: primaryColor),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-                Expanded(
-                  child: Text(
-                      overflow: width <= 520
-                          ? TextOverflow.ellipsis
-                          : TextOverflow.visible,
-                      maxLines: width <= 520 ? 1 : 2,
-                      'Brand',
-                      style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w500,
-                          color: primaryColor),
-                      textAlign: TextAlign.center),
-                ),
-                Expanded(
-                  child: Text(
-                      overflow: width <= 520
-                          ? TextOverflow.ellipsis
-                          : TextOverflow.visible,
-                      maxLines: width <= 520 ? 1 : 2,
-                      'Date',
-                      style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w500,
-                          color: primaryColor),
-                      textAlign: TextAlign.center),
-                ),
-                Expanded(
-                  child: Text(
-                      overflow: width <= 520
-                          ? TextOverflow.ellipsis
-                          : TextOverflow.visible,
-                      maxLines: width <= 520 ? 1 : 2,
-                      'Price',
-                      style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w500,
-                          color: primaryColor),
-                      textAlign: TextAlign.center),
-                ),
+                Expanded(child: Text('Image', textAlign: TextAlign.center, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500, color: primaryColor))),
+                Expanded(child: Text('Title', textAlign: TextAlign.center, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500, color: primaryColor))),
+                Expanded(child: Text('Brand', textAlign: TextAlign.center, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500, color: primaryColor))),
+                Expanded(child: Text('Date', textAlign: TextAlign.center, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500, color: primaryColor))),
+                Expanded(child: Text('Price', textAlign: TextAlign.center, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500, color: primaryColor))),
+                Expanded(child: Text('Action', textAlign: TextAlign.center, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500, color: primaryColor))),
               ],
             ),
           ),
           Expanded(
-            child: StreamBuilder<QuerySnapshot>(
-              stream: fireStore.collection('productsListing').snapshots(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(
-                    child: CircularProgressIndicator(
-                      color: primaryColor,
-                    ),
-                  );
-                } else if (snapshot.hasError) {
-                  return Center(
-                    child: Text('Error Loading Data'),
-                  );
-                } else if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                  return Center(
-                    child: Text('No Listings Found'),
-                  );
-                } else {
-                  List<Map<String, dynamic>> listings =
-                      snapshot.data!.docs.map((doc) {
-                    return {
-                      'productImages': doc['productImages'],
-                      'productName': doc['productName'],
-                      'category': doc['category'],
-                      'brand': doc['brand'],
-                      'productCondition': doc['productCondition'],
-                      'productPrice': doc['productPrice'],
-                      'postedDate': doc['postedDate'],
-                      'sellerId': doc['sellerId'],
-                      'Description': doc['Description'],
-                      // 'approval': doc['approval'],
-                      'size': doc['size'],
-                      'listingId': doc.id,
-                    };
-                  }).toList();
-
-                  // Apply search query filter
-                  List<Map<String, dynamic>> filteredListings =
-                      listings.where((listing) {
-                    String productName = listing['productName'] ?? '';
-
-                    return productName
-                        .toLowerCase()
-                        .contains(searchQuery.toLowerCase());
-                  }).toList();
-
-                  return ListView.builder(
-                    physics: ClampingScrollPhysics(),
-                    itemCount: filteredListings.length,
-                    itemBuilder: (context, index) {
-                      var bookData = filteredListings[index];
-                      Timestamp timestamp = bookData['postedDate'];
-                      String uid = bookData['listingId'];
-                      bool approval = bookData['approval'] ?? false;
-
-                      return GestureDetector(
-                        onTap: () {
-                          // showBookDetailDialog(context, bookData);
-                        },
+            child: _initialLoading
+                ? const AdminLoader(message: 'Loading products...')
+                : _error != null
+                    ? Center(
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Container(
-                                    width: 70,
-                                    height: 70,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      image: DecorationImage(
-                                        image: (bookData['productImages'] !=
-                                                    null &&
-                                                bookData['productImages']
-                                                    .isNotEmpty)
-                                            ? NetworkImage(
-                                                bookData['productImages'][0])
-                                            : const AssetImage(
-                                                    'assets/images/logo.png')
-                                                as ImageProvider,
-                                        fit: BoxFit.contain,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                Expanded(
-                                    child: Text(
-                                        style: TextStyle(
-                                            color: secondaryColor,
-                                            fontWeight: FontWeight.w400,
-                                            fontSize: 15),
-                                        bookData['productName'] ?? 'N/A',
-                                        textAlign: TextAlign.center)),
-                                Expanded(
-                                    child: Text(
-                                        style: TextStyle(
-                                            color: secondaryColor,
-                                            fontWeight: FontWeight.w400,
-                                            fontSize: 15),
-                                        bookData['brand'] ?? 'N/A',
-                                        textAlign: TextAlign.center)),
-                                Expanded(
-                                    child: Text(
-                                        overflow: width <= 520
-                                            ? TextOverflow.ellipsis
-                                            : TextOverflow.visible,
-                                        maxLines: 1,
-                                        style: TextStyle(
-                                            color: secondaryColor,
-                                            fontWeight: FontWeight.w400,
-                                            fontSize: 15),
-                                        _formatTimestamp(timestamp),
-                                        textAlign: TextAlign.center)),
-                                Expanded(
-                                    child: Text(
-                                        style: TextStyle(
-                                            color: secondaryColor,
-                                            fontWeight: FontWeight.w400,
-                                            fontSize: 15),
-                                        "\$${bookData['productPrice'] ?? 'N/A'}",
-                                        textAlign: TextAlign.center)),
-                                // Expanded(
-                                //   child: Row(
-                                //     children: [
-                                //       SizedBox(width: 50),
-                                //       Text(
-                                //         approval
-                                //             ? 'Approved'
-                                //             : 'Approval\npending',
-                                //         style: TextStyle(
-                                //             color: approval
-                                //                 ? Colors.green
-                                //                 : Colors.red),
-                                //       ),
-                                //       SizedBox(width: 5),
-                                //       IconButton(
-                                //         onPressed: () {
-                                //           // showBanConfirmationDialog(
-                                //           //     context, uid,
-                                //
-                                //           );
-                                //         },
-                                //         icon: Icon(Icons.edit,
-                                //             color: Colors.white),
-                                //       ),
-                                //     ],
-                                //   ),
-                                // ),
-                              ],
-                            ),
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 30),
-                              child: Divider(
-                                color: Colors.grey,
-                                thickness: 2,
-                              ),
+                            Text('Error: $_error',
+                                style: const TextStyle(color: Colors.red)),
+                            const SizedBox(height: 8),
+                            ElevatedButton(
+                              onPressed: _refresh,
+                              style: ElevatedButton.styleFrom(
+                                  backgroundColor: primaryColor),
+                              child: const Text('Retry'),
                             ),
                           ],
                         ),
-                      );
-                    },
-                  );
-                }
-              },
-            ),
+                      )
+                    : rows.isEmpty
+                        ? const AdminEmptyState(message: 'No listings found')
+                        : RefreshIndicator(
+                            color: primaryColor,
+                            onRefresh: _refresh,
+                            child: ListView.builder(
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              itemCount: rows.length + 1,
+                              itemBuilder: (context, index) {
+                                if (index == rows.length) {
+                                  return AdminLoadMoreBar(
+                                    hasMore: searchQuery.isEmpty &&
+                                        _paginator.hasMore,
+                                    isLoadingMore: _loadingMore,
+                                    loadedCount: _items.length,
+                                    onLoadMore: _loadMore,
+                                  );
+                                }
+
+                                final bookData = rows[index];
+                                final listingId =
+                                    (bookData['listingId'] ?? '').toString();
+                                final productName =
+                                    (bookData['productName'] ?? 'Listing')
+                                        .toString();
+                                final images = bookData['productImages'];
+
+                                return Column(
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 6),
+                                      child: Row(
+                                        children: [
+                                          Expanded(
+                                            child: Container(
+                                              width: 70,
+                                              height: 70,
+                                              decoration: BoxDecoration(
+                                                shape: BoxShape.circle,
+                                                image: DecorationImage(
+                                                  image: (images is List &&
+                                                          images.isNotEmpty)
+                                                      ? NetworkImage(
+                                                          images[0].toString())
+                                                      : const AssetImage(
+                                                              'assets/images/logo.png')
+                                                          as ImageProvider,
+                                                  fit: BoxFit.contain,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          Expanded(
+                                            child: Text(
+                                              productName,
+                                              textAlign: TextAlign.center,
+                                              style: const TextStyle(
+                                                  color: secondaryColor,
+                                                  fontSize: 15),
+                                            ),
+                                          ),
+                                          Expanded(
+                                            child: Text(
+                                              (bookData['brand'] ?? 'N/A')
+                                                  .toString(),
+                                              textAlign: TextAlign.center,
+                                              style: const TextStyle(
+                                                  color: secondaryColor,
+                                                  fontSize: 15),
+                                            ),
+                                          ),
+                                          Expanded(
+                                            child: Text(
+                                              _formatTimestamp(
+                                                  bookData['postedDate']),
+                                              textAlign: TextAlign.center,
+                                              style: const TextStyle(
+                                                  color: secondaryColor,
+                                                  fontSize: 15),
+                                            ),
+                                          ),
+                                          Expanded(
+                                            child: Text(
+                                              '\$${bookData['productPrice'] ?? 'N/A'}',
+                                              textAlign: TextAlign.center,
+                                              style: const TextStyle(
+                                                  color: secondaryColor,
+                                                  fontSize: 15),
+                                            ),
+                                          ),
+                                          Expanded(
+                                            child: Center(
+                                              child: TextButton.icon(
+                                                onPressed: _isDeleting ||
+                                                        listingId.isEmpty
+                                                    ? null
+                                                    : () => _deleteListing(
+                                                          listingId,
+                                                          productName,
+                                                        ),
+                                                icon: const Icon(Icons.delete,
+                                                    color: Colors.redAccent,
+                                                    size: 18),
+                                                label: const Text(
+                                                  'Delete',
+                                                  style: TextStyle(
+                                                    color: Colors.redAccent,
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    const Padding(
+                                      padding:
+                                          EdgeInsets.symmetric(horizontal: 30),
+                                      child: Divider(
+                                          color: Colors.grey, thickness: 2),
+                                    ),
+                                  ],
+                                );
+                              },
+                            ),
+                          ),
           ),
         ],
       ),
